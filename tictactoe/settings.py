@@ -47,6 +47,13 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'bagwell-tictactoe'
+    }
+}
+
 ROOT_URLCONF = 'tictactoe.urls'
 
 WSGI_APPLICATION = 'tictactoe.wsgi.application'
