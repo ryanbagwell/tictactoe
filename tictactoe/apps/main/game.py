@@ -44,6 +44,52 @@ class TicTacToeGame(object):
 
         return board
 
+    def save_move(self, new_board):
+        """ save the user's move """
+
+        if not self.validate_move(new_board): return False
+
+        game_cache.set(self.game_id, new_board)
+
+        return True
+
+
+    def validate_move(self, new_board):
+
+
+        old = set(self.board.items())
+        new = set(new_board.items())
+
+        result = old.difference(new)
+
+        """ Ensure there is exactly one new move,
+            and it is an 'o' """
+
+        if len(result) is not 1: return False
+
+        """ Ensure we're not changing a square that has
+            an 'x' or an 'o' """
+
+        changed_square = iter(result).next()[0]
+
+        if self.board[changed_square] is 'x' or self.board[changed_square is 'o']: return False
+
+        return True
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

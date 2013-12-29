@@ -1,5 +1,6 @@
 from django.test import TestCase
 from .game import TicTacToeGame
+import random
 
 
 
@@ -16,6 +17,56 @@ class GameTestCase(TestCase):
         self.assertIsNotNone(retrieved_game.game_id, 'A retrieved game should have a game ID')
         self.assertIsNotNone(retrieved_game.board, 'A retrieved game should have a board')
         self.assertIsInstance(retrieved_game.board, dict, 'A retrieved game should have a board that is a dictionary')
+
+    def test_user_can_save_valid_move(self):
+        game = TicTacToeGame()
+
+        new_board = game.board.copy()
+
+        squares = range(9)
+        random.shuffle(squares)
+
+        for i in squares:
+
+            if new_board[i] is '':
+                new_board[i] = 'o'
+                break
+
+        result = game.save_move(new_board)
+
+        self.assertEqual(result, True)
+
+    def test_user_cannot_save_invalid_move(self):
+        game = TicTacToeGame()
+
+        new_board = game.board.copy()
+
+        for k,v in game.board.iteritems():
+
+            if v is 'x':
+                new_board[k] = 'o'
+                break
+
+        result = game.save_move(new_board)
+
+        self.assertEqual(result, False)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
