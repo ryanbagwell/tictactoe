@@ -51,6 +51,25 @@ class GameTestCase(TestCase):
 
         self.assertEqual(result, False)
 
+    def test_computer_should_generate_valid_move(self):
+
+        game = TicTacToeGame()
+
+        new_board = game.board.copy()
+
+        squares = range(9)
+        random.shuffle(squares)
+
+        for i in squares:
+
+            if new_board[i] is '':
+                new_board[i] = 'o'
+                break
+
+        game.save_move(new_board)
+
+        game.generate_move()
+
 
 
 

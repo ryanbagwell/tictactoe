@@ -1,14 +1,16 @@
 from django.core.cache import get_cache
+from .utils import Sequence, WINNING_SEQUENCES
 import random
 import uuid
 import json
 
 game_cache = get_cache('default')
 
+
+
 class TicTacToeGame(object):
     board = None
     game_id = None
-
 
     def __init__(self, game_id=None):
 
@@ -42,20 +44,21 @@ class TicTacToeGame(object):
         """ Place it in memory and return it """
         game_cache.set(self.game_id, board)
 
+        #print board.get_available_sequences()
+
         return board
 
     def save_move(self, new_board):
         """ save the user's move """
 
         if not self.validate_move(new_board): return False
-
         game_cache.set(self.game_id, new_board)
+        self.board = new_board
 
         return True
 
 
     def validate_move(self, new_board):
-
 
         old = set(self.board.items())
         new = set(new_board.items())
@@ -77,31 +80,34 @@ class TicTacToeGame(object):
         return True
 
 
+    def generate_move(self):
+        """ Generate the computer's move by searching
+            the winning sequences for the best way to win """
+
+        print self.board
+
+        seq = sorted(WINNING_SEQUENCES, self._rank_by_squares, reverse=True)
+        seq = sorted(seq, self._rank_by_diagonal, reverse=True)[0]
 
 
+    def _rank_by_squares(self, seq1, seq2):
 
+        seq1 = Sequence(seq1, self.board)
+        seq2 = Sequence(seq2, self.board)
 
+        return seq1.exes - seq2.ohs
 
+    def _rank_by_diagonal(self, seq1, seq2):
 
+        seq1 = Sequence(seq1, self.board)
+        seq2 = Sequence(seq2, self.board)
 
+        if seq1.diagonal and not seq2.diagonal:
+            return 1
+        elif seq1.diagonal and seq2.diagonal:
+            return 0
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        return -1
 
 
 
