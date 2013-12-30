@@ -57,7 +57,7 @@ class TicTacToeGame(object):
 
 
     def get_game(self, game_id):
-        game = game_cache.get(game_id)
+        game = get_cache('default').get(game_id)
         self.game_id = game_id
         return game
 
