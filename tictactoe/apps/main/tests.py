@@ -68,7 +68,41 @@ class GameTestCase(TestCase):
 
         game.save_move(new_board)
 
-        game.generate_move()
+        move = game.generate_move()
+
+        game.save_move(move)
+
+
+    def test_computer_should_win_game(self):
+
+        game = TicTacToeGame()
+
+        while True:
+
+
+            """ make the user move """
+            new_board = game.board.copy()
+
+            squares = range(9)
+            random.shuffle(squares)
+
+            for i in squares:
+
+                if new_board[i] is '':
+                    new_board[i] = 'o'
+                    break
+
+            print "saving user's move ..."
+            if not game.save_move(new_board): break
+
+            """ now make the computer move """
+            move = game.generate_move()
+
+            print "saving computer's move ..."
+            if not game.save_move(move): break
+
+
+
 
 
 
