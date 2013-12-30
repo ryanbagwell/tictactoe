@@ -18,88 +18,106 @@ class GameTestCase(TestCase):
         self.assertIsNotNone(retrieved_game.board, 'A retrieved game should have a board')
         self.assertIsInstance(retrieved_game.board, dict, 'A retrieved game should have a board that is a dictionary')
 
-    def test_user_can_save_valid_move(self):
+    def test_can_make_valid_move(self):
+
+        """ Create a new game """
+
         game = TicTacToeGame()
 
-        new_board = game.board.copy()
+        """ Find the empty squares """
+        empty = game.board._get_empty_squares()
 
-        squares = range(9)
-        random.shuffle(squares)
+        """ Make a move """
+        result = game.move(random.choice(empty), 'o')
 
-        for i in squares:
-
-            if new_board[i] is '':
-                new_board[i] = 'o'
-                break
-
-        result = game.save_move(new_board)
-
+        """ Test the result """
         self.assertEqual(result, True)
 
-    def test_user_cannot_save_invalid_move(self):
+
+    def test_cannot_add_invalid_symbol(self):
         game = TicTacToeGame()
 
-        new_board = game.board.copy()
+        """ Find the empty squares """
+        empty = game.board._get_empty_squares()
 
-        for k,v in game.board.iteritems():
+        """ Make the move """
+        result = game.move(random.choice(empty), 'z')
 
-            if v is 'x':
-                new_board[k] = 'o'
-                break
-
-        result = game.save_move(new_board)
-
+        """ Test the result """
         self.assertEqual(result, False)
 
-    def test_computer_should_generate_valid_move(self):
+
+    def test_cannot_overrwrite_occupied_square(self):
+        game = TicTacToeGame()
+
+        """ Find the occupied squares """
+        occupied = game.board._get_occupied_squares()
+
+        """ Make the move """
+        result = game.move(random.choice(occupied), 'o')
+
+        """ Test the result """
+        self.assertEqual(result, False)
+
+
+    def test_new_game_should_have_no_winnable_sequences(self):
 
         game = TicTacToeGame()
 
-        new_board = game.board.copy()
+        winnable_sequences = game.board._get_winnable_sequences()
 
-        squares = range(9)
-        random.shuffle(squares)
-
-        for i in squares:
-
-            if new_board[i] is '':
-                new_board[i] = 'o'
-                break
-
-        game.save_move(new_board)
-
-        move = game.generate_move()
-
-        game.save_move(move)
+        self.assertEqual(winnable_sequences, [])
 
 
-    def test_computer_should_win_game(self):
 
-        game = TicTacToeGame()
+    # def test_computer_should_generate_valid_move(self):
 
-        while True:
+    #     game = TicTacToeGame()
+
+    #     new_board = game.board.copy()
+
+    #     squares = range(9)
+    #     random.shuffle(squares)
+
+    #     for i in squares:
+
+    #         if new_board[i] is '':
+    #             new_board[i] = 'o'
+    #             break
+
+    #     game.save_move(new_board)
+
+    #     move = game.generate_move()
+
+    #     game.save_move(move)
 
 
-            """ make the user move """
-            new_board = game.board.copy()
+    # def test_computer_should_win_game(self):
 
-            squares = range(9)
-            random.shuffle(squares)
+    #     game = TicTacToeGame()
 
-            for i in squares:
+    #     while True:
 
-                if new_board[i] is '':
-                    new_board[i] = 'o'
-                    break
+    #         """ make the user move """
+    #         new_board = game.board.copy()
 
-            print "saving user's move ..."
-            if not game.save_move(new_board): break
+    #         squares = range(9)
+    #         random.shuffle(squares)
 
-            """ now make the computer move """
-            move = game.generate_move()
+    #         for i in squares:
 
-            print "saving computer's move ..."
-            if not game.save_move(move): break
+    #             if new_board[i] is '':
+    #                 new_board[i] = 'o'
+    #                 break
+
+    #         print "saving user's move ..."
+    #         if not game.save_move(new_board): break
+
+    #         """ now make the computer move """
+    #         move = game.generate_move()
+
+    #         print "saving computer's move ..."
+    #         if not game.save_move(move): break
 
 
 

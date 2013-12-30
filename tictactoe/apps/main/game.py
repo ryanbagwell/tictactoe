@@ -17,52 +17,76 @@ WINNING_SEQUENCES = [
     (2, 5, 8),
 ]
 
-class Sequence(list):
+class BoardSequence(list):
     """ A sequence is a winnable trio of squares """
 
     def __init__(self, lst, board):
-        super(Sequence, self).__init__(lst)
+        super(BoardSequence, self).__init__(lst)
+        self.board = board
+        self.update()
 
-        squares = [v for k, v in board.iteritems() if k in self]
-        self.ohs = len(filter(lambda o: o == 'o', squares))
-        self.exes = len(filter(lambda x: x == 'x', squares))
-        self.empties = len(filter(lambda y: y == '', squares))
+    def update(self):
+        self.squares = [v for k, v in self.board.iteritems() if k in self]
+        self.ohs = len(filter(lambda o: o == 'o', self.squares))
+        self.exes = len(filter(lambda x: x == 'x', self.squares))
+        self.empties = len(filter(lambda y: y == '', self.squares))
         self.diagonal = (self == [0,4,8] or self == [2,4,6])
 
+        if self.exes is 2:
+            self.winnable = 'x'
+        elif self.ohs is 2:
+            self.winnable = 'o'
+        else:
+            self.winnable = False
 
 
 class Board(dict):
     """ A Board object represents all of the game tiles. """
 
-    def __init__(self, data):
+    sequences = []
+
+    def __init__(self, data=None):
+
+        if not data:
+            data = self._get_new_board()
+
         super(Board, self).__init__(data)
+
+        self._initialize_sequences()
+
 
     def update(self, new_board):
         pass
 
 
+    def move(self, square, symbol):
+
+        result = self.validate_move(square, symbol)
+
+        if result:
+            self[square] = symbol
+            return True
+
+        self._update_sequences()
+
+        return False
 
 
-class TicTacToeGame(object):
-    board = None
-    game_id = None
-    status = 'playing'
+    def validate_move(self, square, symbol):
 
-    def __init__(self, game_id=None):
+        """ ensure that the symbol is an x or an o """
+        if symbol is not 'x' and symbol is not 'o': return False
 
-        if game_id:
-            self.board = self.get_game(game_id)
-        else:
-            self.board = self.get_new_game()
+        """ ensure that the square is less than 9 """
+        if square >= 9: return False
 
+        """ ensure that the square is empty """
+        if self[square] is not '': return False
 
-    def get_game(self, game_id):
-        game = get_cache('default').get(game_id)
-        self.game_id = game_id
-        return game
+        return True
 
 
-    def get_new_game(self):
+    def _get_new_board(self):
 
         """ Create an empty dictionary with 9 places to
             represent our board """
@@ -74,64 +98,115 @@ class TicTacToeGame(object):
         """ Then mark the corner as played """
         board[start] = 'x'
 
-        """ Generate a random id to assign to our game """
-        self.game_id = uuid.uuid1().hex
-
-        """ Place it in memory and return it """
-        game_cache.set(self.game_id, board)
-
-        #print board.get_available_sequences()
-
         return board
 
-    def save_move(self, new_board):
-        """ save the user's move """
 
-        if not self.validate_move(new_board):
-            print 'invalid move'
-            return False
+    def _get_empty_squares(self):
 
-        game_cache.set(self.game_id, new_board)
-
-        self.board = new_board
-
-        return True
+        """ Returns a list of squares that are empty """
+        return [k for k, v in self.iteritems() if v is '']
 
 
-    def update_status(self):
-        pass
+    def _get_occupied_squares(self):
+
+        """ Returns a list of squares that are occupied """
+        return [k for k, v in self.iteritems() if v is not '']
+
+
+    def _initialize_sequences(self):
+
+        for sequence in WINNING_SEQUENCES:
+            self.sequences.append(BoardSequence(sequence, self))
+
+    def _update_sequences(self):
+
+        for sequence in self.sequences:
+            sequence.update()
+
+    def _get_winnable_sequences(self, symbol=None):
+
+        if symbol:
+            return [s for s in self.sequences if s.winnable is symbol]
+        else:
+            return [s for s in self.sequences if s.winnable]
 
 
 
-    def validate_move(self, new_board):
 
-        old = set(self.board.items())
-        new = set(new_board.items())
 
-        # print old
-        # print new
 
-        result = old.difference(new)
 
-        """ Ensure there is exactly one new move,
-            and it is an 'o' """
 
-        if len(result) is not 1: return False
 
-        """ Ensure we're not changing a square that has
-            an 'x' or an 'o' """
 
-        changed_square = iter(result).next()[0]
 
-        if self.board[changed_square] is 'x' or self.board[changed_square is 'o']: return False
 
-        return True
+
+
+
+
+
+
+class TicTacToeGame(object):
+    board = None
+    game_id = None
+    status = 'playing'
+    _cache = get_cache('default')
+
+    def __init__(self, game_id=None):
+
+        """ Create a new game if we don't specify a game id """
+        if game_id:
+            self.game_id = game_id
+        else:
+            self.game_id = uuid.uuid1().hex
+
+        if game_id:
+            self.load_board(game_id)
+        else:
+            self.create_new_board()
+
+
+    def load_board(self, game_id):
+
+        """ Loads a board object from memory """
+
+        self.board = self._cache.get(game_id)
+
+    def create_new_board(self):
+
+        """ Creates a new board object and saves it
+            to the game cache """
+
+        self.board = Board()
+        self.save()
+
+    def save(self):
+        """ Saves a board object to memory cache """
+        self._cache.set(self.game_id, self.board)
+
+
+    def move(self, square, symbol):
+        return self.board.move(square, symbol)
 
 
     def generate_move(self, symbol='x'):
+
         """ Generate the computer's move by sorting
             the winning sequences based on the number of
-            exes and whether it's a diagonal play """
+            exes and whether it's a diagonal play.
+
+            Moves are ranked in order of:
+
+            1. Ability to complete a winning sequence
+
+            2. Ability to prevent the user from completing a winning sequence
+
+            3. An empty corner
+
+            4. The number of exes in a winnable sequence
+
+        """
 
         seq = sorted(WINNING_SEQUENCES, self._rank_by_squares, reverse=True)
         best = sorted(seq, self._rank_by_diagonal, reverse=True)[0]
