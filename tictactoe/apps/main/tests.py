@@ -69,55 +69,79 @@ class GameTestCase(TestCase):
         self.assertEqual(winnable_sequences, [])
 
 
+    def test_computer_should_generate_valid_move(self):
 
-    # def test_computer_should_generate_valid_move(self):
+        """ Create a new game """
 
-    #     game = TicTacToeGame()
+        game = TicTacToeGame()
 
-    #     new_board = game.board.copy()
+        """ Make a new move for the user """
+        move = game.generate_move(symbol='o')
 
-    #     squares = range(9)
-    #     random.shuffle(squares)
+        result = game.board.validate_move(**move)
 
-    #     for i in squares:
-
-    #         if new_board[i] is '':
-    #             new_board[i] = 'o'
-    #             break
-
-    #     game.save_move(new_board)
-
-    #     move = game.generate_move()
-
-    #     game.save_move(move)
+        """ Test the result """
+        self.assertEqual(result, True)
 
 
-    # def test_computer_should_win_game(self):
+    def test_invalid_move_should_not_be_valid(self):
 
-    #     game = TicTacToeGame()
+        """ Create a new game """
+        game = TicTacToeGame()
 
-    #     while True:
+        """ Get the occupied squares """
+        occupied = game.board._get_occupied_squares()
 
-    #         """ make the user move """
-    #         new_board = game.board.copy()
+        """ Choose a random square """
+        square = random.choice(occupied)
 
-    #         squares = range(9)
-    #         random.shuffle(squares)
+        """ Try to fill the occupied square
+            with the opposite symbol """
+        symbol = 'x' if game.board[square] is 'o' else 'o'
 
-    #         for i in squares:
+        result = game.board.validate_move(symbol=symbol, square=square)
 
-    #             if new_board[i] is '':
-    #                 new_board[i] = 'o'
-    #                 break
+        """ Test the validation result """
+        self.assertEqual(result, False)
 
-    #         print "saving user's move ..."
-    #         if not game.save_move(new_board): break
 
-    #         """ now make the computer move """
-    #         move = game.generate_move()
 
-    #         print "saving computer's move ..."
-    #         if not game.save_move(move): break
+    def test_computer_should_win_game(self):
+
+        game = TicTacToeGame()
+
+        i = 0
+        while i < 9:
+
+            move = game.generate_move()
+
+            game.board.move(**move)
+
+            print move['symbol']
+
+            i = i +1
+
+
+            # """ make the user move """
+            # new_board = game.board.copy()
+
+            # squares = range(9)
+            # random.shuffle(squares)
+
+            # for i in squares:
+
+            #     if new_board[i] is '':
+            #         new_board[i] = 'o'
+            #         break
+
+            # print "saving user's move ..."
+            # if not game.save_move(new_board): break
+
+            # """ now make the computer move """
+            # move = game.generate_move()
+
+            # print "saving computer's move ..."
+            # if not game.save_move(move): break
 
 
 

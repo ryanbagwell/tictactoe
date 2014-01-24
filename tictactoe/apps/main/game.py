@@ -107,10 +107,10 @@ class Board(dict):
         return [k for k, v in self.iteritems() if v is '']
 
 
-    def _get_occupied_squares(self):
-
+    def _get_occupied_squares(self, symbol='xo'):
         """ Returns a list of squares that are occupied """
-        return [k for k, v in self.iteritems() if v is not '']
+
+        return [k for k, v in self.iteritems() if v in list(symbol)]
 
 
     def _initialize_sequences(self):
@@ -130,18 +130,13 @@ class Board(dict):
         else:
             return [s for s in self.sequences if s.winnable]
 
+    def _get_player_squares(self):
+        """ Returns lists of squares that each symbol has occupied """
 
-
-
-
-
-
-
-
-
-
-
-
+        return {
+            'x': self._get_occupied_squares(symbol='x'),
+            'o': self._get_occupied_squares(symbol='o'),
+        }
 
 
 
@@ -190,7 +185,7 @@ class TicTacToeGame(object):
         return self.board.move(square, symbol)
 
 
-    def generate_move(self, symbol='x'):
+    def generate_move(self, symbol=None):
 
         """ Generate the computer's move by sorting
             the winning sequences based on the number of
@@ -209,29 +204,34 @@ class TicTacToeGame(object):
         """
 
         seq = sorted(WINNING_SEQUENCES, self._rank_by_squares, reverse=True)
+
         best = sorted(seq, self._rank_by_diagonal, reverse=True)[0]
 
-        new_board = self.board.copy()
+        if symbol is None:
+            player_squares = self.board._get_player_squares()
+            symbol = 'x'
+            if len(player_squares['x']) > len(player_squares['o']):
+                symbol = 'o'
 
         for i in best:
-            if new_board[i] is '':
-                new_board[i] = symbol
-                break
-
-        return new_board
+            if self.board[i] is '':
+                return {
+                    'square': i,
+                    'symbol': symbol
+                }
 
 
     def _rank_by_squares(self, seq1, seq2):
 
-        seq1 = Sequence(seq1, self.board)
-        seq2 = Sequence(seq2, self.board)
+        seq1 = BoardSequence(seq1, self.board)
+        seq2 = BoardSequence(seq2, self.board)
 
         return seq1.exes - seq2.ohs
 
     def _rank_by_diagonal(self, seq1, seq2):
 
-        seq1 = Sequence(seq1, self.board)
-        seq2 = Sequence(seq2, self.board)
+        seq1 = BoardSequence(seq1, self.board)
+        seq2 = BoardSequence(seq2, self.board)
 
         if seq1.diagonal and not seq2.diagonal:
             return 1
