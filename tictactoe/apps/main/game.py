@@ -138,6 +138,30 @@ class Board(dict):
             'o': self._get_occupied_squares(symbol='o'),
         }
 
+    def visualize(self):
+        """ Prints a GUI representation of the board """
+
+        vals = [ x if x else ' ' for x in self.values()]
+
+        print '-' * 9
+
+        print ' | '.join(vals[0:3])
+
+        print '-' * 9
+
+        print ' | '.join(vals[3:6])
+
+        print '-' * 9
+
+        print ' | '.join(vals[6:9])
+
+        print '-' * 9
+
+
+
+
+
+
 
 
 
