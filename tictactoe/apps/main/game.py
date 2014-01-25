@@ -4,9 +4,6 @@ import uuid
 import json
 
 
-
-
-
 WINNING_SEQUENCES = [
     (0, 4, 8),
     (2, 4, 6),
@@ -18,28 +15,32 @@ WINNING_SEQUENCES = [
     (2, 5, 8),
 ]
 
+
 class BoardSequence(list):
-    """ A sequence is a winnable trio of squares """
+    """ A utility object that represents a winnable
+        trio of squares its its current state.
+
+        Takes two arguments:
+
+        1. a list representing a winnable sequence
+        2. a game board
+
+    """
 
     def __init__(self, lst, board):
         super(BoardSequence, self).__init__(lst)
-        self.board = board
-        self.update()
+        self.update(board)
 
-    def update(self):
-        self.squares = [v for k, v in self.board.iteritems() if k in self]
-        self.ohs = len(filter(lambda o: o == 'o', self.squares))
-        self.exes = len(filter(lambda x: x == 'x', self.squares))
-        self.empties = len(filter(lambda y: y == '', self.squares))
-        self.occupied = len(filter(lambda z: z is not '', self.squares))
+    def update(self, board):
+        self.squares = [v for k, v in board.iteritems() if k in self]
+        self.ohs = self.squares.count('o')
+        self.exes = self.squares.count('x')
+        self.empties = self.squares.count('')
+        self.occupied = 3 - self.empties
         self.diagonal = (self == [0,4,8] or self == [2,4,6])
+        self.won = self.squares[0] if self.exes is 3 or self.ohs is 3 else False
 
-        if self.exes is 2:
-            self.winnable = 'x'
-        elif self.ohs is 2:
-            self.winnable = 'o'
-        else:
-            self.winnable = False
+
 
 
 class Board(dict):
@@ -63,13 +64,12 @@ class Board(dict):
 
     def move(self, square, symbol):
 
-        result = self.validate_move(square, symbol)
+        is_valid = self.validate_move(square, symbol)
 
-        if result:
+        if is_valid:
             self[square] = symbol
+            self._update_sequences()
             return True
-
-        self._update_sequences()
 
         return False
 
@@ -123,14 +123,7 @@ class Board(dict):
     def _update_sequences(self):
 
         for sequence in self.sequences:
-            sequence.update()
-
-    def _get_winnable_sequences(self, symbol=None):
-
-        if symbol:
-            return [s for s in self.sequences if s.winnable is symbol]
-        else:
-            return [s for s in self.sequences if s.winnable]
+            sequence.update(self)
 
     def _get_player_squares(self):
         """ Returns lists of squares that each symbol has occupied """
@@ -152,6 +145,16 @@ class Board(dict):
         print '-' * 9
         print ' | '.join(vals[6:9])
         print '-' * 9
+
+    def _get_winner(self):
+
+        for sequence in self.sequences:
+            #print sequence.won
+            if sequence.won: return sequence.won
+
+
+
+
 
 
 
@@ -221,7 +224,6 @@ class TicTacToeGame(object):
 
         """ Remove any fully occupied sequences """
         best = [b for b in best if BoardSequence(b, self.board).empties > 0]
-
 
         if symbol is None:
             player_squares = self.board._get_player_squares()

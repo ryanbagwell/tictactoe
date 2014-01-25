@@ -60,15 +60,6 @@ class GameTestCase(TestCase):
         self.assertEqual(result, False)
 
 
-    def test_new_game_should_have_no_winnable_sequences(self):
-
-        game = TicTacToeGame()
-
-        winnable_sequences = game.board._get_winnable_sequences()
-
-        self.assertEqual(winnable_sequences, [])
-
-
     def test_computer_should_generate_valid_move(self):
 
         """ Create a new game """
@@ -111,37 +102,24 @@ class GameTestCase(TestCase):
         game = TicTacToeGame()
 
         i = 0
-        while i < 9:
+        while i < 8:
 
             move = game.generate_move()
 
             game.board.move(**move)
 
-            print move['symbol']
+            game.board.visualize()
+
+            winner = game.board._get_winner()
+
+            self.assertNotEqual(winner, 'o')
+
+            if winner is 'x':
+                print "Computer won"
+                return
 
             i = i +1
 
-
-            # """ make the user move """
-            # new_board = game.board.copy()
-
-            # squares = range(9)
-            # random.shuffle(squares)
-
-            # for i in squares:
-
-            #     if new_board[i] is '':
-            #         new_board[i] = 'o'
-            #         break
-
-            # print "saving user's move ..."
-            # if not game.save_move(new_board): break
-
-            # """ now make the computer move """
-            # move = game.generate_move()
-
-            # print "saving computer's move ..."
-            # if not game.save_move(move): break
 
 
 
