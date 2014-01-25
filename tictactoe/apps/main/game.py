@@ -6,6 +6,7 @@ import json
 
 
 
+
 WINNING_SEQUENCES = [
     (0, 4, 8),
     (2, 4, 6),
@@ -30,6 +31,7 @@ class BoardSequence(list):
         self.ohs = len(filter(lambda o: o == 'o', self.squares))
         self.exes = len(filter(lambda x: x == 'x', self.squares))
         self.empties = len(filter(lambda y: y == '', self.squares))
+        self.occupied = len(filter(lambda z: z is not '', self.squares))
         self.diagonal = (self == [0,4,8] or self == [2,4,6])
 
         if self.exes is 2:
@@ -144,25 +146,12 @@ class Board(dict):
         vals = [ x if x else ' ' for x in self.values()]
 
         print '-' * 9
-
         print ' | '.join(vals[0:3])
-
         print '-' * 9
-
         print ' | '.join(vals[3:6])
-
         print '-' * 9
-
         print ' | '.join(vals[6:9])
-
         print '-' * 9
-
-
-
-
-
-
-
 
 
 
@@ -213,7 +202,8 @@ class TicTacToeGame(object):
 
         """ Generate the computer's move by sorting
             the winning sequences based on the number of
-            exes and whether it's a diagonal play.
+            exes the sequences contains and
+            whether it's a diagonal play.
 
             Moves are ranked in order of:
 
@@ -227,9 +217,11 @@ class TicTacToeGame(object):
 
         """
 
-        seq = sorted(WINNING_SEQUENCES, self._rank_by_squares, reverse=True)
+        best = sorted(WINNING_SEQUENCES, self._rank_by_squares, reverse=True)
 
-        best = sorted(seq, self._rank_by_diagonal, reverse=True)[0]
+        """ Remove any fully occupied sequences """
+        best = [b for b in best if BoardSequence(b, self.board).empties > 0]
+
 
         if symbol is None:
             player_squares = self.board._get_player_squares()
@@ -237,7 +229,7 @@ class TicTacToeGame(object):
             if len(player_squares['x']) > len(player_squares['o']):
                 symbol = 'o'
 
-        for i in best:
+        for i in best[0]:
             if self.board[i] is '':
                 return {
                     'square': i,
@@ -247,22 +239,18 @@ class TicTacToeGame(object):
 
     def _rank_by_squares(self, seq1, seq2):
 
+        """ Create a utility object for each sequence """
         seq1 = BoardSequence(seq1, self.board)
         seq2 = BoardSequence(seq2, self.board)
 
-        return seq1.exes - seq2.ohs
+        """ Apply a numerical weight to each based on
+            the numer of exes in each sequence and the
+            number of occupied squares """
 
-    def _rank_by_diagonal(self, seq1, seq2):
+        rank1 = seq1.exes + seq1.occupied + (1 if seq1.diagonal else 0)
+        rank2 = seq2.exes + seq2.occupied + (1 if seq2.diagonal else 0)
 
-        seq1 = BoardSequence(seq1, self.board)
-        seq2 = BoardSequence(seq2, self.board)
-
-        if seq1.diagonal and not seq2.diagonal:
-            return 1
-        elif seq1.diagonal and seq2.diagonal:
-            return 0
-
-        return -1
+        return rank1 - rank2
 
 
 
