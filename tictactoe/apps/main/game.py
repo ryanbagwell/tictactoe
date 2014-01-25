@@ -149,7 +149,6 @@ class Board(dict):
     def _get_winner(self):
 
         for sequence in self.sequences:
-            #print sequence.won
             if sequence.won: return sequence.won
 
 
