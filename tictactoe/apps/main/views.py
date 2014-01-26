@@ -1,13 +1,36 @@
 from django.views.generic.base import TemplateView, View, ContextMixin
 from tictactoe.apps.main.game import TicTacToeGame
 from django.http import HttpResponse
+from django.core.cache import get_cache
 import json
+
+
+cache = get_cache('default')
+
+def get_game(game_id=None):
+    return cache.get(game_id)
+
+
+def save_game(game=None):
+
+    if game:
+        cache.set(game.game_id, game)
+        return True
+
+    return False
+
+
+def create_game():
+    game = TicTacToeGame()
+    save_game(game)
+    return game
 
 
 
 
 class HomeView(TemplateView):
     template_name = 'home.html'
+
 
 
 class BaseAPIView(ContextMixin, View):
@@ -23,14 +46,21 @@ class BaseAPIView(ContextMixin, View):
             del context['view']
         return context
 
+    def get_json_response_params(self, result, message=None):
+        """ Returns a basic status message that contains
+            common information about all requests """
+
+        return {
+            'result': result,
+            'message': message
+        }
+
     def render_to_response(self, context):
         """ Produces a JSON HTTP response"""
         return HttpResponse(json.dumps(context),
                         content_type='application/json')
 
-    def get_game(self, game_id=None):
-        """ Convenience method to get the game with the given ID """
-        return TicTacToeGame(game_id=game_id)
+
 
 
 
@@ -41,8 +71,17 @@ class NewGameView(BaseAPIView):
 
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(**kwargs)
-        game = TicTacToeGame()
-        context.update(game.__dict__)
+        game = create_game()
+
+        if game:
+            info = self.get_json_response_params('success',
+                'created new game with id %s' % game.game_id)
+        else:
+            info = self.get_json_response_params('error',
+                'could not create new game')
+
+        context.update(dict(info.items() + game.__dict__.items()))
+
         return self.render_to_response(context)
 
 
@@ -51,8 +90,17 @@ class ExistingGameView(BaseAPIView):
 
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(**kwargs)
-        game = TicTacToeGame(game_id=kwargs['game_id'])
-        context.update(game.__dict__)
+        game = get_game(game_id=kwargs['game_id'])
+
+        if game:
+            info = self.get_json_response_params('success',
+                'found game with id %s' % kwargs['game_id'])
+        else:
+            info = self.get_json_response_params('error',
+                'could not get game with id %s' % kwargs['game_id'])
+
+        context.update(dict(info.items() + game.__dict__.items()))
+
         return self.render_to_response(context)
 
 
