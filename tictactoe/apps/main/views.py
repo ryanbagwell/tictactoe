@@ -97,12 +97,20 @@ class MakeMoveView(BaseAPIView):
 
         game = get_game(game_id)
 
+        """ Play the user's move """
+
         try:
             game.move(symbol=symbol, square=int(square))
             info = self.get_json_response_params('success', 'placed "%s" in square %s' % (symbol, square))
         except Exception as e:
             info = self.get_json_response_params('error',
                 getattr(e, 'message', None))
+
+        """ Now generate a corresponding move for the computer """
+
+        computer_move = game.generate_move()
+
+        game.move(symbol=computer_move['symbol'], square=computer_move['square'])
 
         context = self.get_context_data(**kwargs)
 
