@@ -10,21 +10,59 @@ class HomeView(TemplateView):
     template_name = 'home.html'
 
 
-class APIView(ContextMixin, View):
+class BaseAPIView(ContextMixin, View):
 
+    """ A base view that contains common
+        utilities to render a JSON response """
 
-    def get_context_data(self, *args, **kwargs):
-        context = super(APIView, self).get_context_data(*args, **kwargs)
-        game_params = self._get_game(kwargs.get('game_id', None)).__dict__
-        context.update(game_params)
-        del context['view']
+    def get_context_data(self, **kwargs):
+        """ Remove the view item because it's not JSON serializable """
+
+        context = super(BaseAPIView, self).get_context_data(**kwargs)
+        if 'view' in context:
+            del context['view']
         return context
 
+    def render_to_response(self, context):
+        """ Produces a JSON HTTP response"""
+        return HttpResponse(json.dumps(context),
+                        content_type='application/json')
+
+    def get_game(self, game_id=None):
+        """ Convenience method to get the game with the given ID """
+        return TicTacToeGame(game_id=game_id)
+
+
+
+
+class NewGameView(BaseAPIView):
+    """ Creates a new game and returns information
+        about that game """
 
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(**kwargs)
+        game = TicTacToeGame()
+        context.update(game.__dict__)
         return self.render_to_response(context)
 
+
+class ExistingGameView(BaseAPIView):
+    """ Returns information about an existing game """
+
+    def get(self, request, *args, **kwargs):
+        context = self.get_context_data(**kwargs)
+        game = TicTacToeGame(game_id=kwargs['game_id'])
+        context.update(game.__dict__)
+        return self.render_to_response(context)
+
+
+
+class GameOperationView(BaseAPIView):
+    """ Perform the variius operations on a game.
+
+        Ex: move
+
+    """
 
     def post(self, request, *args, **kwargs):
 
@@ -43,8 +81,8 @@ class APIView(ContextMixin, View):
 
 
     def move(self, **kwargs):
-
         """ Place a symbol on a square """
+
         game = self._get_game(game_id=kwargs['game_id'])
 
         square = int(kwargs.get('square'))
@@ -53,15 +91,11 @@ class APIView(ContextMixin, View):
         try:
             game.move(square=square, symbol=symbol)
             return self._get_response('success', 'moved')
-
         except Exception as e:
             return self._get_response('error', e.message)
 
 
-    def render_to_response(self, context):
-        """ Override this method to produce an a json response"""
-        return HttpResponse(json.dumps(context),
-                        content_type='application/json')
+
 
 
     def _get_game(self, game_id=None):
