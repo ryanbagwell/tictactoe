@@ -1,0 +1,19 @@
+{
+  "name": "tic-tac-toe",
+  "version": "0.0.1",
+  "dependencies": {
+    "less": "latest",
+    "bower":"1.2.8",
+    "coffee-script":"latest",
+    "grunt-contrib-watch": "~0.4.3",
+    "grunt-contrib-coffee": "~0.7.0",
+    "grunt-contrib-less": "~0.6.4",
+    "grunt-contrib-imagemin": "~0.3.0",
+    "grunt-contrib-uglify": "0.2.4",
+    "grunt-contrib-cssmin": "~0.7.0",
+    "underscore.string": "~2.3.3",
+    "underscore": "~1.5.2"
+  }
+}
+
+
