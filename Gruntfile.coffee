@@ -18,9 +18,9 @@ module.exports = (grunt) ->
           sourceMap: true
         files: [
           expand: true
-          cwd: 'app/static/<%= _.slugify(projectName) %>/coffee'
+          cwd: 'tictactoe/apps/main/static/tic-tac-toe/coffee/'
           src: ['**/*.?(lit)coffee']
-          dest: 'app/static/<%= _.slugify(projectName) %>/js/'
+          dest: 'tictactoe/apps/main/static/tic-tac-toe/js/'
           rename: coffeeRename
         ]
 
@@ -28,9 +28,9 @@ module.exports = (grunt) ->
       compile:
         files: [
           expand: true
-          cwd: './app/static/<%= _.slugify(projectName) %>/less/'
+          cwd: 'tictactoe/apps/main/static/tic-tac-toe/less/'
           src: ['**/*.less', '!**/_*.less']
-          dest: './app/static/<%= _.slugify(projectName) %>/css/'
+          dest: 'tictactoe/apps/main/static/tic-tac-toe/css/'
           ext: '.css'
         ]
 
@@ -38,10 +38,10 @@ module.exports = (grunt) ->
       options:
         atBegin: true
       coffee:
-        files: ['app/static/<%= _.slugify(projectName) %>/coffee/*.?(lit)coffee']
+        files: ['tictactoe/apps/main/static/tic-tac-toe/coffee/*.?(lit)coffee']
         tasks: ['coffee']
       less:
-        files: ['app/static/<%= _.slugify(projectName) %>/less/**/*.less']
+        files: ['tictactoe/apps/main/static/tic-tac-toe/less/**/*.less']
         tasks: ['less']
 
     cssmin:
