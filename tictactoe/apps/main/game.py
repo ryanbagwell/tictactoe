@@ -1,4 +1,5 @@
 from django.core.cache import get_cache
+from .exceptions import *
 import random
 import uuid
 import json
@@ -77,13 +78,16 @@ class Board(dict):
     def validate_move(self, square, symbol):
 
         """ ensure that the symbol is an x or an o """
-        if symbol is not 'x' and symbol is not 'o': return False
+        if symbol != 'x' and symbol != 'o':
+            raise InvalidSymbol
 
         """ ensure that the square is less than 9 """
-        if square >= 9: return False
+        if square >= 9:
+            raise InvalidSquare
 
         """ ensure that the square is empty """
-        if self[square] is not '': return False
+        if self[square] is not '':
+            raise NonEmptySquare
 
         return True
 
@@ -154,9 +158,6 @@ class Board(dict):
 
 
 
-
-
-
 class TicTacToeGame(object):
     board = None
     game_id = None
@@ -177,11 +178,13 @@ class TicTacToeGame(object):
             self.create_new_board()
 
 
+
     def load_board(self, game_id):
 
         """ Loads a board object from memory """
 
         self.board = self._cache.get(game_id)
+        self.status = 'loaded'
 
     def create_new_board(self):
 
@@ -190,6 +193,7 @@ class TicTacToeGame(object):
 
         self.board = Board()
         self.save()
+        self.status = 'created'
 
     def save(self):
         """ Saves a board object to memory cache """

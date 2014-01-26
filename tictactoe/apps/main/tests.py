@@ -1,6 +1,9 @@
 from django.test import TestCase
 from .game import TicTacToeGame
+from django.test import Client
+from .exceptions import *
 import random
+import json
 
 
 
@@ -40,11 +43,8 @@ class GameTestCase(TestCase):
         """ Find the empty squares """
         empty = game.board._get_empty_squares()
 
-        """ Make the move """
-        result = game.move(random.choice(empty), 'z')
-
-        """ Test the result """
-        self.assertEqual(result, False)
+        """ Make the move and watch for the correct exception """
+        self.assertRaises(InvalidSymbol, game.move, random.choice(empty), 'z')
 
 
     def test_cannot_overrwrite_occupied_square(self):
@@ -54,10 +54,7 @@ class GameTestCase(TestCase):
         occupied = game.board._get_occupied_squares()
 
         """ Make the move """
-        result = game.move(random.choice(occupied), 'o')
-
-        """ Test the result """
-        self.assertEqual(result, False)
+        self.assertRaises(NonEmptySquare, game.move, random.choice(occupied), 'o')
 
 
     def test_computer_should_generate_valid_move(self):
@@ -90,11 +87,7 @@ class GameTestCase(TestCase):
             with the opposite symbol """
         symbol = 'x' if game.board[square] is 'o' else 'o'
 
-        result = game.board.validate_move(symbol=symbol, square=square)
-
-        """ Test the validation result """
-        self.assertEqual(result, False)
-
+        self.assertRaises(NonEmptySquare, game.board.validate_move, symbol=symbol, square=square)
 
 
     def test_computer_should_win_game(self):
@@ -119,6 +112,52 @@ class GameTestCase(TestCase):
                 return
 
             i = i +1
+
+    def test_user_can_create_and_retrieve_saved_game_over_http(self):
+
+        c = Client()
+
+        response = c.get('/game/')
+
+        data = json.loads(response.content)
+
+        game_id = data['game_id']
+
+        second_response = c.get('/game/%s/' % game_id)
+
+        second_response_data = json.loads(second_response.content)
+
+        self.assertEqual(game_id, second_response_data['game_id'])
+
+
+    def test_user_can_make_valid_move_over_http(self):
+
+        c = Client()
+
+        """ start a new game """
+
+        response = c.get('/game/')
+        game_data = json.loads(response.content)
+
+
+        """ load up our game object to generate a new move """
+        game = TicTacToeGame(game_id=game_data['game_id'])
+
+        """ generate the move """
+        move = game.generate_move()
+
+        response = c.post('/game/%s/move/' % game_data['game_id'], move)
+
+
+
+
+
+
+
+
+
+
+
 
 
 
