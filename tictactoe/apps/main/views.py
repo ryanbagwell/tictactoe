@@ -87,59 +87,27 @@ class ExistingGameView(BaseAPIView):
 
 
 
-class GameOperationView(BaseAPIView):
-    """ Perform the variius operations on a game.
+class MakeMoveView(BaseAPIView):
 
-        Ex: move
-
-    """
 
     def post(self, request, *args, **kwargs):
 
-        params = dict(kwargs.items() + request.POST.items())
+        game_id = kwargs.get('game_id', None)
+        symbol = request.POST.get('symbol', None)
+        square = request.POST.get('square', -1)
+
+        game = get_game(game_id)
 
         try:
-            result = getattr(self, kwargs.get('method'))(**params)
-        except AttributeError:
-            result = self._get_response('error', 'success')
+            game.move(symbol=symbol, square=square)
+            info = self.get_json_response_params('error',
+                e.get('message', None))
+        except Exception as e:
+            info = self.get_json_response_params('error',
+                getattr(e, 'message', None))
 
         context = self.get_context_data(**kwargs)
-
-        context.update(result)
+        context.update(dict(info.items() + game.__dict__.items()))
 
         return self.render_to_response(context)
-
-
-    def move(self, **kwargs):
-        """ Place a symbol on a square """
-
-        game = self._get_game(game_id=kwargs['game_id'])
-
-        square = int(kwargs.get('square'))
-        symbol = unicode(kwargs.get('symbol'))
-
-        try:
-            game.move(square=square, symbol=symbol)
-            return self._get_response('success', 'moved')
-        except Exception as e:
-            return self._get_response('error', e.message)
-
-
-
-
-
-    def _get_game(self, game_id=None):
-        """ Convenience method to get the game with the given ID """
-        return TicTacToeGame(game_id=game_id)
-
-
-    def _get_response(self, result, message=None):
-        """ Return a dictionary for inclusion in the json response """
-
-        return {
-            'result': result,
-            'message': message,
-        }
-
-
 
