@@ -11,12 +11,13 @@ class HomeView(TemplateView):
 
 
 class APIView(ContextMixin, View):
-    game = TicTacToeGame()
+
 
     def get_context_data(self, **kwargs):
-        return self.game.board
+        return self._get_game(kwargs.get('game_id', None)).__dict__
 
     def get(self, request, *args, **kwargs):
+
         context = self.get_context_data(**kwargs)
         return self.render_to_response(context)
 
@@ -27,3 +28,6 @@ class APIView(ContextMixin, View):
     def render_to_response(self, context):
         return HttpResponse(json.dumps(context),
                         content_type='application/json')
+
+    def _get_game(self, game_id=None):
+        return TicTacToeGame(game_id=game_id)

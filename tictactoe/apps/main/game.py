@@ -160,20 +160,20 @@ class Board(dict):
 class TicTacToeGame(object):
     board = None
     game_id = None
-    status = 'playing'
+    status = None
     _cache = get_cache('default')
 
     def __init__(self, game_id=None):
 
-        """ Create a new game if we don't specify a game id """
-        if game_id:
-            self.game_id = game_id
-        else:
-            self.game_id = uuid.uuid1().hex
+        """ Generate a game_id if we don't specify one """
 
-        if game_id:
-            self.load_board(game_id)
-        else:
+        self.game_id = game_id or uuid.uuid4().hex
+
+        """ Try to retrieve the game from cache """
+        self.load_board(self.game_id)
+
+        """ If the board is empty, create a new board """
+        if not self.board:
             self.create_new_board()
 
 
