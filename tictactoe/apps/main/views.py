@@ -106,11 +106,15 @@ class MakeMoveView(BaseAPIView):
             info = self.get_json_response_params('error',
                 getattr(e, 'message', None))
 
-        """ Now generate a corresponding move for the computer """
+        """ Now generate a corresponding move for the computer if
+            the game isn't over """
 
-        computer_move = game.generate_move()
+        try:
+            computer_move = game.generate_move()
+            game.move(symbol=computer_move['symbol'], square=computer_move['square'])
 
-        game.move(symbol=computer_move['symbol'], square=computer_move['square'])
+        except:
+            print game
 
         context = self.get_context_data(**kwargs)
 

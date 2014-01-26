@@ -154,27 +154,23 @@ class GameTestCase(TestCase):
     def test_computer_will_never_lose_over_http(self):
 
         """ First, create a new game """
-        game_data = self._create_game()
+        response = self._create_game()
 
-        i = 0
-        while i < 8:
+        while response.get('status', None) != 'game over':
 
             """ Get a copy of the game object
                 to generate a move with """
 
-            game_obj = get_game(game_data['game_id'])
+            game_obj = get_game(response['game_id'])
 
             move = game_obj.generate_move()
 
-            response = self._make_move(game_data['game_id'], move['symbol'], move['square'])
-
-            if response.get('winner', None):
-                break
-
-            i = i +1
+            response = self._make_move(response['game_id'], move['symbol'], move['square'])
 
         self.assertNotEqual(response['winner'], 'o', 'Player "o" won.')
 
+
+    """ Convenience methods """
 
     def _create_game(self):
         """ Makes a request to create a new game """
