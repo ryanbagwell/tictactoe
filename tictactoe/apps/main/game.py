@@ -214,20 +214,18 @@ class TicTacToeGame(object):
         """ Remove any fully occupied sequences """
         best = [b for b in best if BoardSequence(b, self.board).empties > 0]
 
+        """ Figure out which symbol should be played next if
+            it wasn't specified """
         if symbol is None:
             player_squares = self.board._get_player_squares()
             symbol = 'x'
             if len(player_squares['x']) > len(player_squares['o']):
                 symbol = 'o'
 
-        for i in best[0]:
-
-            if self.board[i] is '':
-
-                return {
-                    'square': i,
-                    'symbol': symbol
-                }
+        return {
+            'square': next(i for i in best[0] if self.board[i] is ''),
+            'symbol': symbol
+        }
 
 
     def _rank_by_squares(self, seq1, seq2):
