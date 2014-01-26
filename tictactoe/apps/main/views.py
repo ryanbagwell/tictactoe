@@ -13,6 +13,12 @@ import json
 class HomeView(TemplateView):
     template_name = 'home.html'
 
+    def get_context_data(self, **kwargs):
+        context = super(HomeView, self).get_context_data(**kwargs)
+        game = create_game()
+        context.update(game=game)
+        return context
+
 
 
 class BaseAPIView(ContextMixin, View):
