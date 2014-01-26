@@ -86,7 +86,6 @@ class ExistingGameView(BaseAPIView):
         return self.render_to_response(context)
 
 
-
 class MakeMoveView(BaseAPIView):
 
 
@@ -99,15 +98,17 @@ class MakeMoveView(BaseAPIView):
         game = get_game(game_id)
 
         try:
-            game.move(symbol=symbol, square=square)
-            info = self.get_json_response_params('error',
-                e.get('message', None))
+            game.move(symbol=symbol, square=int(square))
+            info = self.get_json_response_params('success', 'placed "%s" in square %s' % (symbol, square))
         except Exception as e:
             info = self.get_json_response_params('error',
                 getattr(e, 'message', None))
 
         context = self.get_context_data(**kwargs)
+
         context.update(dict(info.items() + game.__dict__.items()))
+
+        save_game(game)
 
         return self.render_to_response(context)
 

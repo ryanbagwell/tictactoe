@@ -2,21 +2,24 @@ from django.test import TestCase
 from .game import TicTacToeGame
 from django.test import Client
 from .exceptions import *
+from .utils import *
 import random
 import json
 
 
 
 
+
 class GameTestCase(TestCase):
 
-    def test_user_can_create_game(self):
-        game = TicTacToeGame()
+    def test_can_create_game(self):
+        game = create_game()
+
         self.assertIsNotNone(game.game_id, 'A new game should have a game ID')
 
-    def test_user_can_retrieve_game(self):
-        game = TicTacToeGame()
-        retrieved_game = TicTacToeGame(game_id=game.game_id)
+    def test_can_retrieve_game(self):
+        game = create_game()
+        retrieved_game = get_game(game.game_id)
         self.assertIsNotNone(retrieved_game.game_id, 'A retrieved game should have a game ID')
         self.assertIsNotNone(retrieved_game.board, 'A retrieved game should have a board')
         self.assertIsInstance(retrieved_game.board, dict, 'A retrieved game should have a board that is a dictionary')
@@ -25,7 +28,7 @@ class GameTestCase(TestCase):
 
         """ Create a new game """
 
-        game = TicTacToeGame()
+        game = create_game()
 
         """ Find the empty squares """
         empty = game.board._get_empty_squares()
@@ -38,7 +41,7 @@ class GameTestCase(TestCase):
 
 
     def test_cannot_add_invalid_symbol(self):
-        game = TicTacToeGame()
+        game = create_game()
 
         """ Find the empty squares """
         empty = game.board._get_empty_squares()
@@ -48,7 +51,7 @@ class GameTestCase(TestCase):
 
 
     def test_cannot_overrwrite_occupied_square(self):
-        game = TicTacToeGame()
+        game = create_game()
 
         """ Find the occupied squares """
         occupied = game.board._get_occupied_squares()
@@ -61,7 +64,7 @@ class GameTestCase(TestCase):
 
         """ Create a new game """
 
-        game = TicTacToeGame()
+        game = create_game()
 
         """ Make a new move for the user """
         move = game.generate_move(symbol='o')
@@ -75,7 +78,7 @@ class GameTestCase(TestCase):
     def test_invalid_move_should_not_be_valid(self):
 
         """ Create a new game """
-        game = TicTacToeGame()
+        game = create_game()
 
         """ Get the occupied squares """
         occupied = game.board._get_occupied_squares()
@@ -92,7 +95,7 @@ class GameTestCase(TestCase):
 
     def test_computer_should_win_game(self):
 
-        game = TicTacToeGame()
+        game = create_game()
 
         i = 0
         while i < 8:
@@ -109,72 +112,114 @@ class GameTestCase(TestCase):
 
             if winner is 'x':
                 print "Computer won"
-                return
+                break
 
             i = i +1
 
 
-    def test_user_can_create_and_retrieve_saved_game_over_http(self):
 
-        c = Client()
 
-        response = c.get('/game/')
+    """ Tests for HTTP Requests """
 
-        data = json.loads(response.content)
+    def test_user_can_create_new_game(self):
 
-        game_id = data['game_id']
+        data = self._create_game()
+        self.assertEqual(data['result'], 'success')
 
-        second_response = c.get('/game/%s/' % game_id)
 
-        second_response_data = json.loads(second_response.content)
+    def test_user_can_retrieve_existing_game(self):
 
-        self.assertEqual(game_id, second_response_data['game_id'])
+        data = self._create_game()
+
+        second_response_data = self._get_game(data['game_id'])
+
+        self.assertEqual(second_response_data['result'], 'success')
+        self.assertEqual(second_response_data['game_id'], data['game_id'])
 
 
     def test_user_can_make_valid_move_over_http(self):
 
+        """ First, create a new game """
+        game_data = self._create_game()
+
+        """ Next, retrieve our game object from the cache
+            and use it to generate a new move """
+        game_obj = get_game(game_data['game_id'])
+        move = game_obj.generate_move()
+
+        """ Make the POST request to make the move """
+        response = self._make_move(game_data['game_id'], move['symbol'], move['square'])
+
+        """ JSON response should be 'success' """
+
+        self.assertEqual(response['result'], 'success', response['message'])
+
+
+
+
+
+
+
+
+
+    #     response = c.post('/game/%s/move/' % game_data['game_id'], move)
+
+
+    # def test_computer_should_win_game_over_http(self):
+
+    #     c = Client()
+
+    #     """ start a new game """
+
+    #     response = c.get('/game/')
+
+    #     game_data = json.loads(response.content)
+
+    #     i = 0
+    #     while i < 8:
+
+    #         """ load up our game object to generate a new move """
+    #         game = TicTacToeGame(game_id=game_data['game_id'])
+
+    #         """ Generate the next move """
+    #         move = game.generate_move()
+
+    #         """ Make the request """
+    #         response = c.post('/game/%s/move/' % game_data['game_id'], move)
+
+    #         response_data = json.loads(response.content)
+
+    #         game.board.visualize()
+
+    #         # self.assertEqual(response_data['result'], 'success', response_data['message'])
+
+    #         i = i +1
+
+    #     # print response
+
+
+    def _create_game(self):
+        """ Makes a request to create a new game """
+
         c = Client()
-
-        """ start a new game """
-
         response = c.get('/game/')
-        game_data = json.loads(response.content)
+        return json.loads(response.content)
 
 
-        """ load up our game object to generate a new move """
-        game = TicTacToeGame(game_id=game_data['game_id'])
-
-        """ generate the move """
-        move = game.generate_move()
-
-        response = c.post('/game/%s/move/' % game_data['game_id'], move)
-
-    def test_computer_should_win_game_over_http(self):
-
-        game = TicTacToeGame()
+    def _get_game(self, game_id):
+        """ Makes a request to get an existing game information """
 
         c = Client()
+        response = c.get('/game/%s/' % game_id)
+        return json.loads(response.content)
 
-        """ start a new game """
+    def _make_move(self, game_id, symbol, square):
+        """ Makes a request to place a tile on a square """
 
-        response = c.get('/game/')
-        game_data = json.loads(response.content)
-
-        """ load up our game object to generate a new move """
-        game = TicTacToeGame(game_id=game_data['game_id'])
-
-        i = 0
-        while i < 8:
-
-            """ Generate the next move """
-            move = game.generate_move()
-
-            """ Make the request """
-            response = c.post('/game/%s/move/' % game_data['game_id'], move)
-
-            i = i +1
-
-        print response
+        c = Client()
+        response = c.post('/game/%s/move/' % game_id,
+            dict(symbol=symbol, square=square))
+        return json.loads(response.content)
 
 
 

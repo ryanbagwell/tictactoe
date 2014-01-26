@@ -151,7 +151,7 @@ class Board(dict):
         print '-' * 9
 
     def _get_winner(self):
-
+        self._update_sequences()
         for sequence in self.sequences:
             if sequence.won: return sequence.won
 
@@ -162,7 +162,7 @@ class TicTacToeGame(object):
     board = None
     game_id = None
     status = 'in progress'
-    _cache = get_cache('default')
+
 
     def __init__(self, game_id=None):
 
@@ -173,18 +173,17 @@ class TicTacToeGame(object):
         """ Try to retrieve the game from cache """
         self.board = Board()
 
-        self.update_status()
-
 
     def move(self, square, symbol):
+
         """ Place a symbol on a square,
             save the board, and return a response """
 
-        if self.status == 'won' or self.status == 'game over':
-            raise GameOver
+        winner = self.board._get_winner()
+
+        if winner: raise GameOver
 
         self.board.move(square, symbol)
-        self.update_status()
 
         return True
 
@@ -245,26 +244,8 @@ class TicTacToeGame(object):
         return rank1 - rank2
 
 
-    def update_status(self):
-        """ Get the game's status """
-
-        winner = self.board._get_winner()
-
-        if winner:
-            self.status = 'won'
-
-        elif self.board._get_empty_squares() is 0:
-            self.status = 'game over'
-
-        else:
-            self.status = 'in progress'
-
-        print self.status
 
 
-    def clear(self):
-        """ Deletes the game from memory """
-        self._cache.delete(self.game_id)
 
 
 
