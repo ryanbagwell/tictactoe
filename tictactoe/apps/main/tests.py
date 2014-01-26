@@ -110,13 +110,9 @@ class GameTestCase(TestCase):
 
             self.assertNotEqual(winner, 'o')
 
-            if winner is 'x':
-                print "Computer won"
-                break
+            if winner is 'x': break
 
             i = i +1
-
-
 
 
     """ Tests for HTTP Requests """
@@ -155,47 +151,29 @@ class GameTestCase(TestCase):
         self.assertEqual(response['result'], 'success', response['message'])
 
 
+    def test_computer_will_never_lose_over_http(self):
 
+        """ First, create a new game """
+        game_data = self._create_game()
 
+        i = 0
+        while i < 8:
 
+            """ Get a copy of the game object
+                to generate a move with """
 
+            game_obj = get_game(game_data['game_id'])
 
+            move = game_obj.generate_move()
 
+            response = self._make_move(game_data['game_id'], move['symbol'], move['square'])
 
-    #     response = c.post('/game/%s/move/' % game_data['game_id'], move)
+            if response.get('winner', None):
+                break
 
+            i = i +1
 
-    # def test_computer_should_win_game_over_http(self):
-
-    #     c = Client()
-
-    #     """ start a new game """
-
-    #     response = c.get('/game/')
-
-    #     game_data = json.loads(response.content)
-
-    #     i = 0
-    #     while i < 8:
-
-    #         """ load up our game object to generate a new move """
-    #         game = TicTacToeGame(game_id=game_data['game_id'])
-
-    #         """ Generate the next move """
-    #         move = game.generate_move()
-
-    #         """ Make the request """
-    #         response = c.post('/game/%s/move/' % game_data['game_id'], move)
-
-    #         response_data = json.loads(response.content)
-
-    #         game.board.visualize()
-
-    #         # self.assertEqual(response_data['result'], 'success', response_data['message'])
-
-    #         i = i +1
-
-    #     # print response
+        self.assertNotEqual(response['winner'], 'o', 'Player "o" won.')
 
 
     def _create_game(self):

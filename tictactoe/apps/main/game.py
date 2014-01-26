@@ -185,6 +185,8 @@ class TicTacToeGame(object):
 
         self.board.move(square, symbol)
 
+        self.winner = self.board._get_winner()
+
         return True
 
 
