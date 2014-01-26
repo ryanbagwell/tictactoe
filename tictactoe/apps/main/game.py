@@ -161,7 +161,7 @@ class Board(dict):
 class TicTacToeGame(object):
     board = None
     game_id = None
-    status = None
+    status = 'in progress'
     _cache = get_cache('default')
 
     def __init__(self, game_id=None):
@@ -177,10 +177,10 @@ class TicTacToeGame(object):
         if not self.board:
             self.create_new_board()
 
+        self.update_status()
 
 
     def load_board(self, game_id):
-
         """ Loads a board object from memory """
 
         self.board = self._cache.get(game_id)
@@ -197,11 +197,21 @@ class TicTacToeGame(object):
 
     def save(self):
         """ Saves a board object to memory cache """
-        self._cache.set(self.game_id, self.board)
+        self._cache.set(self.game_id, self)
 
 
     def move(self, square, symbol):
-        return self.board.move(square, symbol)
+        """ Place a symbol on a square,
+            save the board, and return a response """
+
+        if self.status == 'won' or self.status == 'game over':
+            raise GameOver
+
+        self.board.move(square, symbol)
+        self.update_status()
+        self.save()
+
+        return True
 
 
     def generate_move(self, symbol=None):
@@ -235,7 +245,9 @@ class TicTacToeGame(object):
                 symbol = 'o'
 
         for i in best[0]:
+
             if self.board[i] is '':
+
                 return {
                     'square': i,
                     'symbol': symbol
@@ -256,6 +268,34 @@ class TicTacToeGame(object):
         rank2 = seq2.exes + seq2.occupied + (1 if seq2.diagonal else 0)
 
         return rank1 - rank2
+
+
+    def update_status(self):
+        """ Get the game's status """
+
+        winner = self.board._get_winner()
+
+        if winner:
+            self.status = 'won'
+
+        elif self.board._get_empty_squares() is 0:
+            self.status = 'game over'
+
+        else:
+            self.status = 'in progress'
+
+        print self.status
+
+
+    def clear(self):
+        """ Deletes the game from memory """
+        self._cache.delete(self.game_id)
+
+
+
+
+
+
 
 
 
