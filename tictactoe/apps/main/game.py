@@ -171,33 +171,9 @@ class TicTacToeGame(object):
         self.game_id = game_id or uuid.uuid4().hex
 
         """ Try to retrieve the game from cache """
-        self.load_board(self.game_id)
-
-        """ If the board is empty, create a new board """
-        if not self.board:
-            self.create_new_board()
+        self.board = Board()
 
         self.update_status()
-
-
-    def load_board(self, game_id):
-        """ Loads a board object from memory """
-
-        self.board = self._cache.get(game_id)
-        self.status = 'loaded'
-
-    def create_new_board(self):
-
-        """ Creates a new board object and saves it
-            to the game cache """
-
-        self.board = Board()
-        self.save()
-        self.status = 'created'
-
-    def save(self):
-        """ Saves a board object to memory cache """
-        self._cache.set(self.game_id, self)
 
 
     def move(self, square, symbol):
@@ -209,7 +185,6 @@ class TicTacToeGame(object):
 
         self.board.move(square, symbol)
         self.update_status()
-        self.save()
 
         return True
 
