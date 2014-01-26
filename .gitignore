@@ -1,2 +1,5 @@
 *.pyc
 node_modules/
+tictactoe/apps/main/static/third-party/
+tictactoe/apps/main/static/tic-tac-toe/js/
+tictactoe/apps/main/static/tic-tac-toe/css/
