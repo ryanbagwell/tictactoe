@@ -113,6 +113,7 @@ class GameTestCase(TestCase):
 
             i = i +1
 
+
     def test_user_can_create_and_retrieve_saved_game_over_http(self):
 
         c = Client()
@@ -147,6 +148,35 @@ class GameTestCase(TestCase):
         move = game.generate_move()
 
         response = c.post('/game/%s/move/' % game_data['game_id'], move)
+
+    def test_computer_should_win_game_over_http(self):
+
+        game = TicTacToeGame()
+
+        c = Client()
+
+        """ start a new game """
+
+        response = c.get('/game/')
+        game_data = json.loads(response.content)
+
+        """ load up our game object to generate a new move """
+        game = TicTacToeGame(game_id=game_data['game_id'])
+
+        i = 0
+        while i < 8:
+
+            """ Generate the next move """
+            move = game.generate_move()
+
+            """ Make the request """
+            response = c.post('/game/%s/move/' % game_data['game_id'], move)
+
+            i = i +1
+
+        print response
+
+
 
 
 
