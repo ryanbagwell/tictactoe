@@ -162,6 +162,7 @@ class TicTacToeGame(object):
     board = None
     game_id = None
     status = 'in progress'
+    winner = None
 
 
     def __init__(self, game_id=None):
@@ -179,15 +180,13 @@ class TicTacToeGame(object):
         """ Place a symbol on a square,
             save the board, and return a response """
 
-        winner = self.board._get_winner()
+        if self.winner: raise GameOver
 
-        if winner: raise GameOver
+        result = self.board.move(square, symbol)
 
-        self.board.move(square, symbol)
+        self.update_status()
 
-        self.winner = self.board._get_winner()
-
-        return True
+        return result
 
 
     def generate_move(self, symbol=None):
@@ -242,6 +241,17 @@ class TicTacToeGame(object):
         rank2 = seq2.exes + seq2.occupied + (1 if seq2.diagonal else 0)
 
         return rank1 - rank2
+
+    def update_status(self):
+
+        self.winner = self.board._get_winner()
+
+        if len(self.board._get_empty_squares()) is 0:
+            self.status = 'game over'
+        elif self.winner:
+            self.status = 'game over'
+        else:
+            self.status = 'in progress'
 
 
 
