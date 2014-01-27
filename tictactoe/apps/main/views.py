@@ -1,6 +1,7 @@
 from django.views.generic.base import TemplateView, View, ContextMixin
 from tictactoe.apps.main.game import TicTacToeGame
 from django.http import HttpResponse
+from django.views.decorators.csrf import csrf_exempt
 from .utils import *
 import json
 
@@ -25,6 +26,11 @@ class BaseAPIView(ContextMixin, View):
 
     """ A base view that contains common
         utilities to render a JSON response """
+
+    @csrf_exempt
+    def dispatch(self, *args, **kwargs):
+        super(BaseAPIView, self).dispatch(*args, **kwargs)
+
 
     def get_context_data(self, **kwargs):
         """ Remove the view item because it's not JSON serializable """
