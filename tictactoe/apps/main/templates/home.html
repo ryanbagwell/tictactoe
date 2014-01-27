@@ -22,36 +22,43 @@
 
     <body>
 
-        <h1>Tic Tac Toe</h1>
+        <section class="well well-lg">
 
-        <table>
+            <h1>Tic Tac Toe</h1>
 
-            <tr>
-                <td rel="0">{{ game.board.0 }}</td>
-                <td rel="1">{{ game.board.1 }}</td>
-                <td rel="2">{{ game.board.2 }}</td>
-            </tr>
+            <table>
 
-           <tr>
-                <td rel="3">{{ game.board.3 }}</td>
-                <td rel="4">{{ game.board.4 }}</td>
-                <td rel="5">{{ game.board.5 }}</td>
-            </tr>
+                <tr>
+                    <td rel="0">{{ game.board.0 }}</td>
+                    <td rel="1">{{ game.board.1 }}</td>
+                    <td rel="2">{{ game.board.2 }}</td>
+                </tr>
 
-           <tr>
-                <td rel="6">{{ game.board.6 }}</td>
-                <td rel="7">{{ game.board.7 }}</td>
-                <td rel="8">{{ game.board.8 }}</td>
-            </tr>
+               <tr>
+                    <td rel="3">{{ game.board.3 }}</td>
+                    <td rel="4">{{ game.board.4 }}</td>
+                    <td rel="5">{{ game.board.5 }}</td>
+                </tr>
 
-        </table>
+               <tr>
+                    <td rel="6">{{ game.board.6 }}</td>
+                    <td rel="7">{{ game.board.7 }}</td>
+                    <td rel="8">{{ game.board.8 }}</td>
+                </tr>
+
+            </table>
+
+        </setion>
 
     </body>
 
     <script>
     require(['game'], function(TicTacToe){
 
-        new TicTacToe({el: $('table')});
+        new TicTacToe({
+            el: $('table'),
+            gameId: '{{ game.game_id }}'
+        });
 
     });
     </script>
