@@ -217,33 +217,26 @@ class TicTacToeGame(object):
 
 
     def generate_move(self, symbol=None):
+        """ Generate a move for the given symbol by comparing
+            the importance of each winnable sequence. The rating
+            criteria is contained in the board sequence.
 
-        """ Generate the computer's move by sorting
-            the winning sequences based on the number of
-            exes the sequences contains and
-            whether it's a diagonal play.
+            If no symbol is found, we determined what the next
+            symbol should be.
 
-            Moves are ranked in order of:
+            Arguments:
 
-            1. Ability to complete a winning sequence
+            symbol -- the symbol to generate a move for (either 'x' or 'o')
 
-            2. Ability to prevent the user from completing a winning sequence
+            Returns a dictionary consiting of:
 
-            3. An empty corner
-
-            4. The number of exes in a winnable sequence
+            square -- an integer identifying the square to place the symbol on
+            symbol -- the symbol to place in the square
 
         """
 
-        """ Figure out which symbol should be played next if
-            it wasn't specified """
         if symbol is None:
-            player_squares = self.board._get_player_squares()
-
-            if len(player_squares['x']) > len(player_squares['o']):
-                symbol = 'o'
-            else:
-                symbol = 'x'
+            symbol = 'o' if self.board.values().count('x') > self.board.values().count('o') else 'x'
 
         """ Wrap our comparison method in a function whose
             first argument is the symbol we want to place """
@@ -276,6 +269,7 @@ class TicTacToeGame(object):
 
 
     def update_status(self):
+        """ Update the status of the game. """
 
         self.winner, self.winning_sequence = self.board._get_winner()
 
