@@ -44,39 +44,61 @@ class BoardSequence(list):
 
     def get_rank(self, symbol):
 
-        """ Rank the priority """
+        """ Rank the importance of the sequence
+            for placement purposes.
 
-        """ If the sequence has two of the symbol
-            and one empty, you can win it """
+            Ranks are based on:
+
+            2 - the sequence has two squares with given symbol
+                and one empty square, and the game can be won
+
+            1 - the sequence has two squares with the opposite
+                symbol and one empty square, and should be blocked
+
+            0 - a neutral ranking
+
+            -1 - at least one square in the sequence contains the
+                opposite symbol, and cannot be won, so we don't want
+                to play it.
+
+            Arguments:
+
+            symbol -- the symbol to place in the square ('x' or 'o')
+
+            Returns the numerical rank of sequence.
+
+        """
+
+
         if self.squares.count(symbol) - self.empties == 2:
-            return 3
-
-        """ If there's two of the opposite symbol, we need to
-            block it """
-        if 3 - self.squares.count(symbol) - self.empties == 2:
             return 2
 
-        """ If the sequence has any of the opposite symbol,
-            we don't want to play it """
-        if 3 - self.squares.count(symbol) - self.empties > 0:
-            return 0
+        if 3 - self.squares.count(symbol) - self.empties == 2:
+            return 1
 
-        return 1
+        if 3 - self.squares.count(symbol) - self.empties > 0:
+            return -1
+
+        return 0
 
 
 
 class Board(dict):
-    """ A Board object represents all of the game tiles. """
+    """ A Board object represents all of the game tiles
+        and provides methods for modifying the board and
+        retrieving information about the board. """
 
+    """ A list of BoardSequence instances """
     sequences = []
 
     def __init__(self, data=None):
+        """ Create a new board if one is not provided """
+        if not data: data = self._get_new_board()
 
-        if not data:
-            data = self._get_new_board()
-
+        """ Call the parent method to initialze our list """
         super(Board, self).__init__(data)
 
+        """ Populate the sequences list """
         self._initialize_sequences()
 
 
