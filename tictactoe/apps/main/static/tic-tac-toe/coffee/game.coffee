@@ -10,7 +10,7 @@ define (require) ->
 
 
         initialize: (options) ->
-            _.bindAll @, 'move', 'updateBoard', 'handleResponse'
+            _.bindAll @, 'move', 'updateBoard', 'handleResponse', 'gameOver'
 
             @gameId = options.gameId
 
@@ -22,13 +22,12 @@ define (require) ->
                 symbol: 'o',
                 square: $(e.currentTarget).attr 'rel'
 
-
             $.post url, params, @handleResponse
 
         handleResponse: (response, status) ->
+            @updateBoard(response.board)
             @gameOver(response) if response.status == 'game over'
 
-            @updateBoard(response.board) unless response.result != 'success' and response.status == 'game over'
 
         updateBoard: (board) ->
             _.each board, (symbol, square) ->
@@ -37,7 +36,10 @@ define (require) ->
             , @
 
         gameOver: (response) ->
-
+            _.each response.winning_sequence, (square) ->
+                @$el.find('td[rel="'+square+'"]').addClass 'winner'
+            , @
+            alert 'Game Over'
 
 
 
