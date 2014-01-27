@@ -7,11 +7,9 @@ import json
 
 
 
-
-
-
-
 class HomeView(TemplateView):
+    """ The base view for the root url. """
+
     template_name = 'home.html'
 
     def get_context_data(self, **kwargs):
@@ -23,41 +21,55 @@ class HomeView(TemplateView):
 
 
 class BaseAPIView(ContextMixin, View):
-
     """ A base view that contains common
-        utilities to render a JSON response """
-
+        utilities to render a JSON response
+    """
 
     def get_context_data(self, **kwargs):
-        """ Remove the view item because it's not JSON serializable """
+        """ Remove the view item because it's
+            not JSON serializable
+        """
 
         context = super(BaseAPIView, self).get_context_data(**kwargs)
-        if 'view' in context:
-            del context['view']
+
+        if 'view' in context: del context['view']
+
         return context
 
+
     def get_json_response_params(self, result, message=None):
-        """ Returns a basic status message that contains
-            common information about all requests """
+        """ Returns a basic and common status message
+            that contains common information for each
+            API request.
+
+            Arguments:
+
+            result  -- a string consisting of either 'success' or 'error'
+            message -- an optional description for the succss or error
+
+            Returns a dictionary consisting of the result and a result message
+
+        """
 
         return {
             'result': result,
             'message': message
         }
 
+
     def render_to_response(self, context):
-        """ Produces a JSON HTTP response"""
+        """ Overrides the parent method to
+            produce a JSON HTTP response
+        """
+
         return HttpResponse(json.dumps(context),
                         content_type='application/json')
 
 
-
-
-
-
 class NewGameView(BaseAPIView):
     """ Creates a new game and returns information
-        about that game """
+        about that game
+    """
 
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(**kwargs)
@@ -95,7 +107,7 @@ class ExistingGameView(BaseAPIView):
 
 
 class MakeMoveView(BaseAPIView):
-
+    """ The view for a player to make a move """
 
     @csrf_exempt
     def dispatch(self, *args, **kwargs):
@@ -107,11 +119,10 @@ class MakeMoveView(BaseAPIView):
         symbol = request.POST.get('symbol', None)
         square = request.POST.get('square', -1)
 
+        """ Grab the game object from the cache """
         game = get_game(game_id)
 
-
         """ Play the user's move """
-
         try:
             game.move(symbol=symbol, square=int(square))
             info = self.get_json_response_params('success', 'placed "%s" in square %s' % (symbol, square))
@@ -119,20 +130,21 @@ class MakeMoveView(BaseAPIView):
             info = self.get_json_response_params('error',
                 getattr(e, 'message', None))
 
-        """ Now generate a corresponding move for the computer if
-            the game isn't over """
-
+        """ Now generate a corresponding move for the
+            computer unless the game is over """
         try:
             computer_move = game.generate_move()
             game.move(symbol=computer_move['symbol'], square=computer_move['square'])
         except:
             pass
 
-        context = self.get_context_data(**kwargs)
+        """ Combine our kwargs, basic info and game
+            dictionary to get our context """
+        params = dict(info.items() + game.__dict__.items() + kwargs.items())
 
-        context.update(dict(info.items() + game.__dict__.items()))
+        context = self.get_context_data(**params)
 
         save_game(game)
 
-        return self.render_to_response(context)
+        return self.render_to_response(params)
 
