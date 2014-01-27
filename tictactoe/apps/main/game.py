@@ -6,6 +6,7 @@ import uuid
 import json
 
 
+""" The list of winnable sequences """
 WINNING_SEQUENCES = [
     (0, 4, 8),
     (2, 4, 6),
@@ -20,12 +21,12 @@ WINNING_SEQUENCES = [
 
 class BoardSequence(list):
     """ A utility object that represents a winnable
-        trio of squares its its current state.
+        trio of squares in its current state.
 
-        Takes two arguments:
+        Arguments:
 
-        1. a list representing a winnable sequence
-        2. a game board
+        lst   -- list or tuple representing a winnable sequence
+        board -- a dictionary representing a board
 
     """
 
@@ -34,6 +35,9 @@ class BoardSequence(list):
         self.update(board)
 
     def update(self, board):
+        """ Updates various informative values
+            based on the value of the given board. """
+
         self.squares = [v for k, v in board.iteritems() if k in self]
         self.ohs = self.squares.count('o')
         self.exes = self.squares.count('x')
@@ -68,7 +72,6 @@ class BoardSequence(list):
             Returns the numerical rank of sequence.
 
         """
-
 
         if self.squares.count(symbol) - self.empties == 2:
             return 2
