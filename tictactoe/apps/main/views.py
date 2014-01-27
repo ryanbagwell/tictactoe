@@ -27,10 +27,6 @@ class BaseAPIView(ContextMixin, View):
     """ A base view that contains common
         utilities to render a JSON response """
 
-    @csrf_exempt
-    def dispatch(self, *args, **kwargs):
-        super(BaseAPIView, self).dispatch(*args, **kwargs)
-
 
     def get_context_data(self, **kwargs):
         """ Remove the view item because it's not JSON serializable """
@@ -101,6 +97,10 @@ class ExistingGameView(BaseAPIView):
 class MakeMoveView(BaseAPIView):
 
 
+    @csrf_exempt
+    def dispatch(self, *args, **kwargs):
+        return super(MakeMoveView, self).dispatch(*args, **kwargs)
+
     def post(self, request, *args, **kwargs):
 
         game_id = kwargs.get('game_id', None)
@@ -108,6 +108,7 @@ class MakeMoveView(BaseAPIView):
         square = request.POST.get('square', -1)
 
         game = get_game(game_id)
+
 
         """ Play the user's move """
 
@@ -124,9 +125,8 @@ class MakeMoveView(BaseAPIView):
         try:
             computer_move = game.generate_move()
             game.move(symbol=computer_move['symbol'], square=computer_move['square'])
-
         except:
-            print game
+            pass
 
         context = self.get_context_data(**kwargs)
 
