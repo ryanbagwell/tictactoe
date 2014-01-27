@@ -171,6 +171,7 @@ class Board(dict):
         print ' | '.join(vals[6:9])
         print '-' * 9
 
+
     def _get_winner(self):
         self._update_sequences()
 
@@ -188,6 +189,7 @@ class TicTacToeGame(object):
     game_id = None
     status = 'in progress'
     winner = None
+
 
 
     def __init__(self, game_id=None):
@@ -243,12 +245,13 @@ class TicTacToeGame(object):
             else:
                 symbol = 'x'
 
-        if symbol == 'x':
-            cmp = self._rank_for_x
-        else:
-            cmp = self._rank_for_o
+        """ Wrap our comparison method in a function whose
+            first argument is the symbol we want to place """
+        cmp = partial(self.compare_ranks, symbol)
 
-        best = sorted(WINNING_SEQUENCES, cmp, reverse=True)
+        """ Now call the comparison method """
+        self.board._update_sequences()
+        best = sorted(self.board.sequences, cmp, reverse=True)
 
         """ Remove any fully occupied sequences """
         best = [b for b in best if BoardSequence(b, self.board).empties > 0]
@@ -259,21 +262,17 @@ class TicTacToeGame(object):
         }
 
 
-    def _rank_for_x(self, seq1, seq2):
+    def compare_ranks(self, symbol, seq1, seq2):
+        """ Compare the ranks of two sequences using sorted().
 
-        """ Create a utility object for each sequence """
-        seq1 = BoardSequence(seq1, self.board)
-        seq2 = BoardSequence(seq2, self.board)
+            Arguments:
+            symbol -- the symbol to place on a square
+            seq1   -- the first winable sequence to rank
+            seq2   -- the other winable sequence to rank
 
-        return seq1.get_rank('x') - seq2.get_rank('x')
+        """
 
-
-    def _rank_for_o(self, seq1, seq2):
-        """ Create a utility object for each sequence """
-        seq1 = BoardSequence(seq1, self.board)
-        seq2 = BoardSequence(seq2, self.board)
-
-        return seq1.get_rank('o') - seq2.get_rank('o')
+        return seq1.get_rank(symbol) - seq2.get_rank(symbol)
 
 
     def update_status(self):
