@@ -12,6 +12,8 @@ import json
 
 class GameTestCase(TestCase):
 
+    """ Tests for computer-generated situations """
+
     def test_can_create_game(self):
         game = create_game()
 
@@ -152,6 +154,9 @@ class GameTestCase(TestCase):
 
 
     def test_computer_will_never_lose_over_http(self):
+        """ To Do: also run this test by placing a sybol in a
+            random empty square instead of generating the move
+            based on our forced ranking """
 
         """ First, create a new game """
         response = self._create_game()
