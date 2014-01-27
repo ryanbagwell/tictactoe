@@ -152,8 +152,10 @@ class Board(dict):
 
     def _get_winner(self):
         self._update_sequences()
+
         for sequence in self.sequences:
-            if sequence.won: return sequence.won
+            if sequence.won:
+                return (sequence.won, sequence,)
 
 
 
@@ -244,7 +246,7 @@ class TicTacToeGame(object):
 
     def update_status(self):
 
-        self.winner = self.board._get_winner()
+        self.winner, self.winning_sequence = self.board._get_winner()
 
         if len(self.board._get_empty_squares()) is 0:
             self.status = 'game over'
