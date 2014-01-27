@@ -80,11 +80,18 @@ class Board(dict):
         self._initialize_sequences()
 
 
-    def update(self, new_board):
-        pass
-
-
     def move(self, square, symbol):
+        """ Places a symbol on a square if the
+            placement is valid.
+
+            Arguments:
+
+            square -- an integer representing the square to place the symbol on
+            symbol -- the symbol to place in the square ('x' or 'o')
+
+            Returns True upon success, False on error
+
+        """
 
         is_valid = self.validate_move(square, symbol)
 
