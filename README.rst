@@ -10,15 +10,26 @@ In addition to Django and other Python dependences specified in requirements.pip
 
 Installation
 ++++++++++++
-1. Clone this repo, and cd into the its root directory
-2. Create a virtual environment, and activate it
+1. Clone this repo, and cd into its root directory.
+
+2. Create a virtual environment, and activate it.
+
 3. Install requirements with pip::
-   pip install -r requirements.pip
+
+    pip install -r requirements.pip
+
 4. Install node dependencies::
-   npm install
+
+    npm install
+
 5. Install bower dependencies::
-   ./node_modules/.bin/bower install
+
+    ./node_modules/.bin/bower install
+
 6. Build the frontend files with Grunt::
-   ./node_modules/.bin/grunt build
+
+    ./node_modules/.bin/grunt build
+
 7. Start the server::
-   ./manage.py runserver
+
+    ./manage.py runserver
