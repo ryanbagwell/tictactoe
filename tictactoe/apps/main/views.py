@@ -6,8 +6,8 @@ from .utils import *
 import json
 
 
-
 class HomeView(TemplateView):
+
     """ The base view for the root url. """
 
     template_name = 'home.html'
@@ -19,8 +19,8 @@ class HomeView(TemplateView):
         return context
 
 
-
 class BaseAPIView(ContextMixin, View):
+
     """ A base view that contains common
         utilities to render a JSON response
     """
@@ -32,10 +32,10 @@ class BaseAPIView(ContextMixin, View):
 
         context = super(BaseAPIView, self).get_context_data(**kwargs)
 
-        if 'view' in context: del context['view']
+        if 'view' in context:
+            del context['view']
 
         return context
-
 
     def get_json_response_params(self, result, message=None):
         """ Returns a basic and common status message
@@ -56,17 +56,17 @@ class BaseAPIView(ContextMixin, View):
             'message': message
         }
 
-
     def render_to_response(self, context):
         """ Overrides the parent method to
             produce a JSON HTTP response
         """
 
         return HttpResponse(json.dumps(context),
-                        content_type='application/json')
+                            content_type='application/json')
 
 
 class NewGameView(BaseAPIView):
+
     """ Creates a new game and returns information
         about that game
     """
@@ -77,10 +77,10 @@ class NewGameView(BaseAPIView):
 
         if game:
             info = self.get_json_response_params('success',
-                'created new game with id %s' % game.game_id)
+                                                 'created new game with id %s' % game.game_id)
         else:
             info = self.get_json_response_params('error',
-                'could not create new game')
+                                                 'could not create new game')
 
         context.update(dict(info.items() + game.__dict__.items()))
 
@@ -88,6 +88,7 @@ class NewGameView(BaseAPIView):
 
 
 class ExistingGameView(BaseAPIView):
+
     """ Returns information about an existing game """
 
     def get(self, request, *args, **kwargs):
@@ -96,10 +97,10 @@ class ExistingGameView(BaseAPIView):
 
         if game:
             info = self.get_json_response_params('success',
-                'found game with id %s' % kwargs['game_id'])
+                                                 'found game with id %s' % kwargs['game_id'])
         else:
             info = self.get_json_response_params('error',
-                'could not get game with id %s' % kwargs['game_id'])
+                                                 'could not get game with id %s' % kwargs['game_id'])
 
         context.update(dict(info.items() + game.__dict__.items()))
 
@@ -107,6 +108,7 @@ class ExistingGameView(BaseAPIView):
 
 
 class MakeMoveView(BaseAPIView):
+
     """ The view for a player to make a move """
 
     @csrf_exempt
@@ -125,16 +127,18 @@ class MakeMoveView(BaseAPIView):
         """ Play the user's move """
         try:
             game.move(symbol=symbol, square=int(square))
-            info = self.get_json_response_params('success', 'placed "%s" in square %s' % (symbol, square))
+            info = self.get_json_response_params(
+                'success', 'placed "%s" in square %s' % (symbol, square))
         except Exception as e:
             info = self.get_json_response_params('error',
-                getattr(e, 'message', None))
+                                                 getattr(e, 'message', None))
 
         """ Now generate a corresponding move for the
             computer unless the game is over """
         try:
             computer_move = game.generate_move()
-            game.move(symbol=computer_move['symbol'], square=computer_move['square'])
+            game.move(symbol=computer_move['symbol'],
+                      square=computer_move['square'])
         except:
             pass
 
@@ -147,4 +151,3 @@ class MakeMoveView(BaseAPIView):
         save_game(game)
 
         return self.render_to_response(params)
-

@@ -7,9 +7,6 @@ import random
 import json
 
 
-
-
-
 class GameTestCase(TestCase):
 
     """ Tests for computer-generated situations """
@@ -22,12 +19,14 @@ class GameTestCase(TestCase):
     def test_can_retrieve_game(self):
         game = create_game()
         retrieved_game = get_game(game.game_id)
-        self.assertIsNotNone(retrieved_game.game_id, 'A retrieved game should have a game ID')
-        self.assertIsNotNone(retrieved_game.board, 'A retrieved game should have a board')
-        self.assertIsInstance(retrieved_game.board, dict, 'A retrieved game should have a board that is a dictionary')
+        self.assertIsNotNone(retrieved_game.game_id,
+                             'A retrieved game should have a game ID')
+        self.assertIsNotNone(retrieved_game.board,
+                             'A retrieved game should have a board')
+        self.assertIsInstance(retrieved_game.board, dict,
+                              'A retrieved game should have a board that is a dictionary')
 
     def test_can_make_valid_move(self):
-
         """ Create a new game """
 
         game = create_game()
@@ -41,7 +40,6 @@ class GameTestCase(TestCase):
         """ Test the result """
         self.assertEqual(result, True)
 
-
     def test_cannot_add_invalid_symbol(self):
         game = create_game()
 
@@ -51,7 +49,6 @@ class GameTestCase(TestCase):
         """ Make the move and watch for the correct exception """
         self.assertRaises(InvalidSymbol, game.move, random.choice(empty), 'z')
 
-
     def test_cannot_overrwrite_occupied_square(self):
         game = create_game()
 
@@ -59,11 +56,10 @@ class GameTestCase(TestCase):
         occupied = game.board._get_occupied_squares()
 
         """ Make the move """
-        self.assertRaises(NonEmptySquare, game.move, random.choice(occupied), 'o')
-
+        self.assertRaises(NonEmptySquare, game.move,
+                          random.choice(occupied), 'o')
 
     def test_computer_should_generate_valid_move(self):
-
         """ Create a new game """
 
         game = create_game()
@@ -76,9 +72,7 @@ class GameTestCase(TestCase):
         """ Test the result """
         self.assertEqual(result, True)
 
-
     def test_invalid_move_should_not_be_valid(self):
-
         """ Create a new game """
         game = create_game()
 
@@ -92,8 +86,8 @@ class GameTestCase(TestCase):
             with the opposite symbol """
         symbol = 'x' if game.board[square] is 'o' else 'o'
 
-        self.assertRaises(NonEmptySquare, game.board.validate_move, symbol=symbol, square=square)
-
+        self.assertRaises(NonEmptySquare, game.board.validate_move,
+                          symbol=symbol, square=square)
 
     def test_computer_should_win_game(self):
 
@@ -112,10 +106,10 @@ class GameTestCase(TestCase):
 
             self.assertNotEqual(winner, 'o')
 
-            if winner is 'x': break
+            if winner is 'x':
+                break
 
-            i = i +1
-
+            i = i + 1
 
     """ Tests for HTTP Requests """
 
@@ -123,7 +117,6 @@ class GameTestCase(TestCase):
 
         data = self._create_game()
         self.assertEqual(data['result'], 'success')
-
 
     def test_user_can_retrieve_existing_game(self):
 
@@ -134,9 +127,7 @@ class GameTestCase(TestCase):
         self.assertEqual(second_response_data['result'], 'success')
         self.assertEqual(second_response_data['game_id'], data['game_id'])
 
-
     def test_user_can_make_valid_move_over_http(self):
-
         """ First, create a new game """
         game_data = self._create_game()
 
@@ -146,12 +137,12 @@ class GameTestCase(TestCase):
         move = game_obj.generate_move()
 
         """ Make the POST request to make the move """
-        response = self._make_move(game_data['game_id'], move['symbol'], move['square'])
+        response = self._make_move(
+            game_data['game_id'], move['symbol'], move['square'])
 
         """ JSON response should be 'success' """
 
         self.assertEqual(response['result'], 'success', response['message'])
-
 
     def test_computer_will_never_lose_over_http(self):
         """ To Do: also run this test by placing a sybol in a
@@ -170,10 +161,10 @@ class GameTestCase(TestCase):
 
             move = game_obj.generate_move()
 
-            response = self._make_move(response['game_id'], move['symbol'], move['square'])
+            response = self._make_move(
+                response['game_id'], move['symbol'], move['square'])
 
         self.assertNotEqual(response['winner'], 'o', 'Player "o" won.')
-
 
     """ Convenience methods """
 
@@ -183,7 +174,6 @@ class GameTestCase(TestCase):
         c = Client()
         response = c.get('/game/')
         return json.loads(response.content)
-
 
     def _get_game(self, game_id):
         """ Makes a request to get an existing game information """
@@ -197,48 +187,5 @@ class GameTestCase(TestCase):
 
         c = Client()
         response = c.post('/game/%s/move/' % game_id,
-            dict(symbol=symbol, square=square))
+                          dict(symbol=symbol, square=square))
         return json.loads(response.content)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

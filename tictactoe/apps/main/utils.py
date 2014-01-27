@@ -3,6 +3,7 @@ from django.core.cache import get_cache
 
 cache = get_cache('default')
 
+
 def get_game(game_id=None):
     return cache.get(game_id)
 

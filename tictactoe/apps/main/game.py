@@ -20,6 +20,7 @@ WINNING_SEQUENCES = [
 
 
 class BoardSequence(list):
+
     """ A utility object that represents a winnable
         trio of squares in its current state.
 
@@ -43,11 +44,11 @@ class BoardSequence(list):
         self.exes = self.squares.count('x')
         self.empties = self.squares.count('')
         self.occupied = 3 - self.empties
-        self.diagonal = (self == [0,4,8] or self == [2,4,6])
-        self.won = self.squares[0] if self.exes is 3 or self.ohs is 3 else False
+        self.diagonal = (self == [0, 4, 8] or self == [2, 4, 6])
+        self.won = self.squares[
+            0] if self.exes is 3 or self.ohs is 3 else False
 
     def get_rank(self, symbol):
-
         """ Rank the importance of the sequence
             for placement purposes.
 
@@ -85,8 +86,8 @@ class BoardSequence(list):
         return 0
 
 
-
 class Board(dict):
+
     """ A Board object represents all of the game tiles
         and provides methods for modifying the board and
         retrieving information about the board. """
@@ -96,14 +97,14 @@ class Board(dict):
 
     def __init__(self, data=None):
         """ Create a new board if one is not provided """
-        if not data: data = self._get_new_board()
+        if not data:
+            data = self._get_new_board()
 
         """ Call the parent method to initialze our list """
         super(Board, self).__init__(data)
 
         """ Populate the sequences list """
         self._initialize_sequences()
-
 
     def move(self, square, symbol):
         """ Places a symbol on a square if the
@@ -126,7 +127,6 @@ class Board(dict):
             return True
 
         return False
-
 
     def validate_move(self, square, symbol):
         """ Validate's the proposed placement of a symbol
@@ -156,7 +156,6 @@ class Board(dict):
 
         return True
 
-
     def _get_new_board(self):
         """ Return a dictionary with 9 key->value pairs to
             represent our board, and place an 'x' in a corner
@@ -165,25 +164,22 @@ class Board(dict):
         board = dict((v, '') for v in range(9))
 
         """ Pick a corner for the computer's first move """
-        start = random.choice([0,2,6,8])
+        start = random.choice([0, 2, 6, 8])
 
         """ Then mark the corner as played """
         board[start] = 'x'
 
         return board
 
-
     def _get_empty_squares(self):
         """ Returns a list of squares that are empty """
 
         return [k for k, v in self.iteritems() if v is '']
 
-
     def _get_occupied_squares(self, symbol='xo'):
         """ Returns a list of squares that are occupied """
 
         return [k for k, v in self.iteritems() if v in list(symbol)]
-
 
     def _initialize_sequences(self):
         """ Creates instances of BoardSequence and
@@ -213,17 +209,16 @@ class Board(dict):
             the board for development purposes.
         """
 
-        vals = [ x if x else ' ' for x in self.values()]
+        vals = [x if x else ' ' for x in self.values()]
 
-        print '\n' .join([ '-' * 9,
-                ' | '.join(vals[0:3]),
-                '-' * 9,
-                ' | '.join(vals[3:6]),
-                '-' * 9,
-                ' | '.join(vals[6:9]),
-                '-' * 9,
-            ])
-
+        print '\n' .join(['-' * 9,
+                          ' | '.join(vals[0:3]),
+                          '-' * 9,
+                          ' | '.join(vals[3:6]),
+                          '-' * 9,
+                          ' | '.join(vals[6:9]),
+                          '-' * 9,
+                          ])
 
     def _get_winner(self):
         """ Get the game winner if one exists.
@@ -244,9 +239,8 @@ class Board(dict):
         return (None, None)
 
 
-
-
 class TicTacToeGame(object):
+
     """ A TicTacToeGame object represents a
         game and provides methods to create unique game IDs,
         place symbols in square and track the status of the game.
@@ -267,15 +261,12 @@ class TicTacToeGame(object):
     """ If the game has been won, identifies the winner ('x' or 'oh') """
     winner = None
 
-
     def __init__(self, game_id=None):
-
         """ Generate a game_id if we don't specify one """
         self.game_id = game_id or uuid.uuid4().hex
 
         """ Create a new Board() object """
         self.board = Board()
-
 
     def move(self, square, symbol):
         """ Place a symbol on a square, save the board,
@@ -289,14 +280,14 @@ class TicTacToeGame(object):
             Returns a boolean representing whether the placement was successful
         """
 
-        if self.winner: raise GameOver
+        if self.winner:
+            raise GameOver
 
         result = self.board.move(square, symbol)
 
         self.update_status()
 
         return result
-
 
     def generate_move(self, symbol=None):
         """ Generate a move for the given symbol by comparing
@@ -318,7 +309,8 @@ class TicTacToeGame(object):
         """
 
         if symbol is None:
-            symbol = 'o' if self.board.values().count('x') > self.board.values().count('o') else 'x'
+            symbol = 'o' if self.board.values().count(
+                'x') > self.board.values().count('o') else 'x'
 
         """ Wrap our comparison method in a function whose
             first argument is the symbol we want to place """
@@ -336,7 +328,6 @@ class TicTacToeGame(object):
             'symbol': symbol
         }
 
-
     def compare_ranks(self, symbol, seq1, seq2):
         """ Compare the ranks of two sequences using sorted().
 
@@ -349,7 +340,6 @@ class TicTacToeGame(object):
 
         return seq1.get_rank(symbol) - seq2.get_rank(symbol)
 
-
     def update_status(self):
         """ Update the status of the game. """
 
@@ -361,19 +351,3 @@ class TicTacToeGame(object):
             self.status = 'game over'
         else:
             self.status = 'in progress'
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
