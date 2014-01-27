@@ -173,6 +173,15 @@ class Board(dict):
 
 
     def _get_winner(self):
+        """ Get the game winner if one exists.
+
+            Returns a tuple consisting of:
+
+            winner   -- either 'x' or 'o', or None
+            sequence -- a list representing the three squares, or None
+
+        """
+
         self._update_sequences()
 
         for sequence in self.sequences:
