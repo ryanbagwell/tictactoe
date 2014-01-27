@@ -1,5 +1,6 @@
 from django.core.cache import get_cache
 from .exceptions import *
+from functools import partial
 import random
 import uuid
 import json
@@ -40,6 +41,26 @@ class BoardSequence(list):
         self.occupied = 3 - self.empties
         self.diagonal = (self == [0,4,8] or self == [2,4,6])
         self.won = self.squares[0] if self.exes is 3 or self.ohs is 3 else False
+
+    def get_rank(self, symbol):
+
+        """ Rank the priority """
+
+        """ If the sequence has two of the symbol
+            and one empty, you can win it """
+        if self.squares.count(symbol) - self.empties == 2:
+            return 3
+
+        """ If there's two of the opposite symbol, we need to
+            block it """
+
+        if 3 - self.squares.count(symbol) - self.empties == 2:
+            return 2
+
+        return 1
+
+
+
 
 
 
@@ -157,6 +178,8 @@ class Board(dict):
             if sequence.won:
                 return (sequence.won, sequence,)
 
+        return (None, None)
+
 
 
 
@@ -210,18 +233,25 @@ class TicTacToeGame(object):
 
         """
 
-        best = sorted(WINNING_SEQUENCES, self._rank_by_squares, reverse=True)
-
-        """ Remove any fully occupied sequences """
-        best = [b for b in best if BoardSequence(b, self.board).empties > 0]
-
         """ Figure out which symbol should be played next if
             it wasn't specified """
         if symbol is None:
             player_squares = self.board._get_player_squares()
-            symbol = 'x'
+
             if len(player_squares['x']) > len(player_squares['o']):
                 symbol = 'o'
+            else:
+                symbol = 'x'
+
+        if symbol == 'x':
+            cmp = self._rank_for_x
+        else:
+            cmp = self._rank_for_o
+
+        best = sorted(WINNING_SEQUENCES, cmp, reverse=True)
+
+        """ Remove any fully occupied sequences """
+        best = [b for b in best if BoardSequence(b, self.board).empties > 0]
 
         return {
             'square': next(i for i in best[0] if self.board[i] is ''),
@@ -229,20 +259,21 @@ class TicTacToeGame(object):
         }
 
 
-    def _rank_by_squares(self, seq1, seq2):
+    def _rank_for_x(self, seq1, seq2):
 
         """ Create a utility object for each sequence """
         seq1 = BoardSequence(seq1, self.board)
         seq2 = BoardSequence(seq2, self.board)
 
-        """ Apply a numerical weight to each based on
-            the numer of exes in each sequence and the
-            number of occupied squares """
+        return seq1.get_rank('x') - seq2.get_rank('x')
 
-        rank1 = seq1.exes + seq1.occupied + (1 if seq1.diagonal else 0)
-        rank2 = seq2.exes + seq2.occupied + (1 if seq2.diagonal else 0)
 
-        return rank1 - rank2
+    def _rank_for_o(self, seq1, seq2):
+        """ Create a utility object for each sequence """
+        seq1 = BoardSequence(seq1, self.board)
+        seq2 = BoardSequence(seq2, self.board)
+
+        return seq1.get_rank('o') - seq2.get_rank('o')
 
     def update_status(self):
 
