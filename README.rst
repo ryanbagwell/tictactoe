@@ -6,7 +6,7 @@ A tic tac toe game that you can try to win, but you never will.
 Dependencies
 ++++++++++++
 
-In addition to Django and other Python dependences specified in requirements.txt, this project requires `nodejs <http://nodejs.org/>`_ (and ``npm``, which comes with node) in order to install and build the frontend files. Stylesheets and Javascript are compiled from less and coffeescript using Grunt.
+In addition to Django and other Python dependences specified in requirements.pip, this project requires `nodejs <http://nodejs.org/>`_ (and ``npm``, which comes with node) in order to install and build the frontend files. Stylesheets and Javascript are compiled from less and coffeescript using Grunt.
 
 Installation
 ++++++++++++
