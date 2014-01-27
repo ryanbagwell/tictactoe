@@ -12,7 +12,8 @@
     "grunt-contrib-uglify": "0.2.4",
     "grunt-contrib-cssmin": "~0.7.0",
     "underscore.string": "~2.3.3",
-    "underscore": "~1.5.2"
+    "underscore": "~1.5.2",
+    "grunt-cli":"~0.1.13"
   }
 }
 
