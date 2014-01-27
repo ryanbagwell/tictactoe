@@ -53,15 +53,15 @@ class BoardSequence(list):
 
         """ If there's two of the opposite symbol, we need to
             block it """
-
         if 3 - self.squares.count(symbol) - self.empties == 2:
             return 2
 
+        """ If the sequence has any of the opposite symbol,
+            we don't want to play it """
+        if 3 - self.squares.count(symbol) - self.empties > 0:
+            return 0
+
         return 1
-
-
-
-
 
 
 
@@ -274,6 +274,7 @@ class TicTacToeGame(object):
         seq2 = BoardSequence(seq2, self.board)
 
         return seq1.get_rank('o') - seq2.get_rank('o')
+
 
     def update_status(self):
 
