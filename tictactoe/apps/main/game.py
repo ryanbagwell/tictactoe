@@ -97,16 +97,28 @@ class Board(dict):
 
 
     def validate_move(self, square, symbol):
+        """ Validate's the proposed placement of a symbol
+            in a square. Checks that:
 
-        """ ensure that the symbol is an x or an o """
+            1. the symbol is an 'x' or an 'o'
+            2. the square is less than 9
+            3. the target square is empty
+
+            Arguments:
+
+            square -- an integer representing the square to place the symbol on
+            symbol -- the symbol to place in the square ('x' or 'o')
+
+            Returns True if valid, raises an error if invalid
+
+        """
+
         if symbol != 'x' and symbol != 'o':
             raise InvalidSymbol
 
-        """ ensure that the square is less than 9 """
         if square >= 9:
             raise InvalidSquare
 
-        """ ensure that the square is empty """
         if self[square] is not '':
             raise NonEmptySquare
 
@@ -114,9 +126,10 @@ class Board(dict):
 
 
     def _get_new_board(self):
+        """ Return a dictionary with 9 key->value pairs to
+            represent our board, and place an 'x' in a corner
+            of the board for the computer's first move """
 
-        """ Create an empty dictionary with 9 places to
-            represent our board """
         board = dict((v, '') for v in range(9))
 
         """ Pick a corner for the computer's first move """
@@ -129,8 +142,8 @@ class Board(dict):
 
 
     def _get_empty_squares(self):
-
         """ Returns a list of squares that are empty """
+
         return [k for k, v in self.iteritems() if v is '']
 
 
@@ -141,11 +154,16 @@ class Board(dict):
 
 
     def _initialize_sequences(self):
+        """ Creates instances of BoardSequence and
+            adds them to self.sequences """
 
         for sequence in WINNING_SEQUENCES:
             self.sequences.append(BoardSequence(sequence, self))
 
     def _update_sequences(self):
+        """ Updates each instance of BoardSequence
+            in self.sequences
+        """
 
         for sequence in self.sequences:
             sequence.update(self)
