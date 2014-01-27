@@ -101,7 +101,7 @@ class Board(dict):
             in a square. Checks that:
 
             1. the symbol is an 'x' or an 'o'
-            2. the square is less than 9
+            2. the square is between 0 and 9
             3. the target square is empty
 
             Arguments:
@@ -116,7 +116,7 @@ class Board(dict):
         if symbol != 'x' and symbol != 'o':
             raise InvalidSymbol
 
-        if square >= 9:
+        if 0 < square >= 9:
             raise InvalidSquare
 
         if self[square] is not '':
