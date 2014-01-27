@@ -185,27 +185,47 @@ class Board(dict):
 
 
 class TicTacToeGame(object):
-    board = None
-    game_id = None
-    status = 'in progress'
-    winner = None
+    """ A TicTacToeGame object represents a
+        game and provides methods to create unique game IDs,
+        place symbols in square and track the status of the game.
 
+        This should only be instantiated once. When instantiated, it should be
+        stored in the default cache using utils.save_game().
+    """
+
+    """ An instance of a Board object """
+    board = None
+
+    """ The game's unique ID """
+    game_id = None
+
+    """ The game's status (either 'game over' or 'in progress') """
+    status = 'in progress'
+
+    """ If the game has been won, identifies the winner ('x' or 'oh') """
+    winner = None
 
 
     def __init__(self, game_id=None):
 
         """ Generate a game_id if we don't specify one """
-
         self.game_id = game_id or uuid.uuid4().hex
 
-        """ Try to retrieve the game from cache """
+        """ Create a new Board() object """
         self.board = Board()
 
 
     def move(self, square, symbol):
+        """ Place a symbol on a square, save the board,
+            and return a response  with the result of the move.
 
-        """ Place a symbol on a square,
-            save the board, and return a response """
+            Arguments:
+
+            square -- an integer representing the square to place the symbol on
+            symbol -- the symbol to place in the square ('x' or 'o')
+
+            Returns a boolean representing whether the placement was successful
+        """
 
         if self.winner: raise GameOver
 
